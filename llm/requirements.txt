@@ -1,5 +1,5 @@
 #with python v3.11.13
-numpy==1.23.4 # numpy==2.3.0
+numpy==2.3.0 #numpy==1.23.4
 pandas==2.3.0
 matplotlib==3.10.3
 seaborn==0.13.2
@@ -12,4 +12,5 @@ torch==2.7.1
 evaluate==0.4.3
 langdetect==1.0.9 #not using this
 fasttext-langdetect==1.0.5
-fast-langdetect==0.1.0 #might stop using this
+#fast-langdetect==0.1.0 #might stop using this
+accelerate==1.8.1
