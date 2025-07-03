@@ -1,3 +1,8 @@
 .venv/
 llm/data/
 .DS_Store
+llm/model_results/
+wandb/
+*.png
+llm/OLD_SCRIPTS/
+llm/other_outputs/
