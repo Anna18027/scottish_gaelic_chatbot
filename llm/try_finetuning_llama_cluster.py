@@ -71,7 +71,7 @@ print("starting to load model")
 model = AutoModelForCausalLM.from_pretrained(
     model_path,
     local_files_only=True
-)
+).to("cuda" if torch.cuda.is_available() else "cpu")
 
 print("model loaded.starting to load tokenizer")
 
@@ -186,7 +186,8 @@ def compute_loss(model, dataset):
     losses = []
     with torch.no_grad():
         for example in dataset:
-            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to("cpu")
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to(device)
             pad_id = int(tokenizer.pad_token_id)
             attention_mask = (input_ids != pad_id).long()
 
@@ -196,7 +197,7 @@ def compute_loss(model, dataset):
             if (labels != -100).sum().item() == 0:
                 continue
 
-            outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+            outputs = model(input_ids=input_ids.to(device), attention_mask=attention_mask.to(device), labels=labels.to(device))
             loss = outputs.loss.item()
             if not math.isnan(loss):
                 losses.append(loss)
@@ -235,7 +236,7 @@ training_args = TrainingArguments(
     logging_dir="./logs",
     logging_steps=logging_steps,
     save_total_limit=save_total_limit,
-    fp16=False,
+    fp16=True if torch.cuda.is_available() else False,
     report_to="wandb",
 )
 
@@ -249,6 +250,8 @@ trainer = Trainer(
     data_collator=data_collator,
     callbacks = [EpochLossLoggerCallback()]
 )
+
+print("Using device:", next(model.parameters()).device)
 
 #train the model
 trainer.train()
