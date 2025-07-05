@@ -87,12 +87,24 @@ model.to("cpu")
 #load json dataset
 dataset = load_dataset("json", data_files={"train": train_file}, split="train")
 
+print("data loaded")
+print(f"length of dataset before filtering for empty:{len(dataset)}")
+
 #remove empty lines
 dataset = dataset.filter(is_not_empty)
+
+print(f"length of dataset after filtering for empty:{len(dataset)}")
+
+total_tokens = sum(len(tokenizer(x["text"])["input_ids"]) for x in dataset)
+print(f"number of tokens in dataset before subsetting: {total_tokens}")
+
 
 #use only a subset of the dataset
 if use_subset == True:
     dataset = dataset.select(range(subset_size))
+
+total_tokens = sum(len(tokenizer(x["text"])["input_ids"]) for x in dataset)
+print(f"number of tokens in dataset after subsetting: {total_tokens}")
 
 #apply tokenizer to the dataset
 tokenized_subset = dataset.map(tokenize)
