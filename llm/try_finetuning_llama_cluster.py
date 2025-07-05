@@ -17,6 +17,7 @@ import os
 import json
 import matplotlib.pyplot as plt
 from datetime import datetime
+from peft import get_peft_model, LoraConfig, TaskType
 
 #set model params
 num_epochs = 6
@@ -94,9 +95,25 @@ model = AutoModelForCausalLM.from_pretrained(
     model_path,
     device_map="auto",
     local_files_only=True
-).to("cuda" if torch.cuda.is_available() else "cpu")
+)
+# .to("cuda" if torch.cuda.is_available() else "cpu")
 
 print("model loaded")
+
+peft_config = LoraConfig(
+    r=4,
+    lora_alpha=64,
+    target_modules=[
+    "q_proj", "v_proj",
+    "k_proj", "o_proj",             
+    "gate_proj", "up_proj", "down_proj"
+],
+    lora_dropout=0.05,
+    bias="none",
+    task_type=TaskType.CAUSAL_LM
+)
+model = get_peft_model(model, peft_config)
+model.print_trainable_parameters()
 
 
 print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
