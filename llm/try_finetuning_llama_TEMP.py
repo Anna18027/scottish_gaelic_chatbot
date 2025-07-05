@@ -29,12 +29,11 @@ logging_steps = 1
 save_total_limit = 1
 
 #set file paths
-train_file = "/exports/eddie/scratch/s2751141/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz"
-val_file = "/exports/eddie/scratch/s2751141/data/temp_data/gaidhlig_test_set.txt"
-
-#train_file = "llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz" #"llm/data/temp_data/gaidhlig_test_set.txt"
-#val_file = "llm/data/temp_data/gaidhlig_test_set.txt" #"llm/data/temp_data/english_test_set.txt"
+#set file paths
+train_file = "llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz" #"llm/data/temp_data/gaidhlig_test_set.txt"
+val_file = "llm/data/temp_data/gaidhlig_test_set.txt" #"llm/data/temp_data/english_test_set.txt"
 output_dir = "llm/model_results/llama_finetuned"
+
 
 #set wandb run name
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -55,23 +54,13 @@ wandb.init(
 
 #1. LOAD TOKENIZER & MODEL --------------------------------------------------------------------------------------
 
+# model_path = "/exports/eddie/scratch/s2751141/hf_models/models--meta-llama--Llama-3.2-1B"
 
-#os.environ["HF_HOME"] = "/exports/eddie/scratch/s2751141/hf_cache"
-#os.environ["TRANSFORMERS_CACHE"] = "/exports/eddie/scratch/s2751141/hf_cache/transformers"
-#os.environ["HF_DATASETS_CACHE"] = "/exports/eddie/scratch/s2751141/hf_cache/datasets"
-print("below is hf token from python:")
-print(os.environ.get("HUGGINGFACE_HUB_TOKEN"))
-print("end of token")
-
-model_path = "/exports/eddie/scratch/s2751141/hf_models/models--meta-llama--Llama-3.2-1B"
-
-print("starting to load model")
+# print("starting to load model")
 
 # Load model
-model = AutoModelForCausalLM.from_pretrained(
-    model_path,
-    local_files_only=True
-).to("cuda" if torch.cuda.is_available() else "cpu")
+model = AutoModelForCausalLM.from_pretrained(model_name)
+model.to(device)
 
 print("model loaded.starting to load tokenizer")
 
