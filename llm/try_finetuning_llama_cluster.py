@@ -52,7 +52,8 @@ wandb.init(
     }
 )
 
-
+#set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #1. LOAD TOKENIZER & MODEL --------------------------------------------------------------------------------------
 
 
@@ -67,13 +68,12 @@ model_path = "/exports/eddie/scratch/s2751141/hf_models/models--meta-llama--Llam
 
 print("starting to load model")
 
-# Load model
-model = AutoModelForCausalLM.from_pretrained(
-    model_path,
-    local_files_only=True
-).to("cuda" if torch.cuda.is_available() else "cpu")
 
-print("model loaded.starting to load tokenizer")
+print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
+print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
+torch.cuda.empty_cache()
+print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
+print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
 
 # Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(
@@ -81,7 +81,27 @@ tokenizer = AutoTokenizer.from_pretrained(
     local_files_only=True
 )
 
+
 print("tokenizer loaded")
+print("Vocab size before adding pad token:", len(tokenizer))
+
+print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
+print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
+
+
+# Load model
+model = AutoModelForCausalLM.from_pretrained(
+    model_path,
+    device_map="auto",
+    local_files_only=True
+).to("cuda" if torch.cuda.is_available() else "cpu")
+
+print("model loaded")
+
+
+print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
+print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
+
 
 #load tokenizer from model
 #tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -90,9 +110,15 @@ print("tokenizer loaded")
 tokenizer.add_tokens(["<|pad|>"])
 tokenizer.pad_token = "<|pad|>"
 tokenizer.pad_token_id = tokenizer.convert_tokens_to_ids("<|pad|>")
-
+print("Vocab size after adding pad token:", len(tokenizer))
 
 print("padding tokens added")
+
+old_embed_size = model.get_input_embeddings().weight.shape[0]
+print("Model embedding size before resize:", old_embed_size)
+model.resize_token_embeddings(len(tokenizer))
+new_embed_size = model.get_input_embeddings().weight.shape[0]
+print("Model embedding size after resize:", new_embed_size)
 
 #function for setting tokenizer args
 def tokenize(example):
@@ -119,6 +145,9 @@ def is_not_empty(example):
 # dataset = load_dataset("text", data_files={"train": train_file}, streaming=True)
 
 print("starting to load data")
+
+print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
+print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
 
 #load json dataset
 dataset = load_dataset("json", data_files={"train": train_file}, split="train")
@@ -306,7 +335,7 @@ print(f"Saved raw loss values to {loss_file}")
 #6. FINISHING UP --------------------------------------------------------------------------------------------
 
 #report final loss
-model.to("cpu")
+model.to(device)
 final_loss, final_ppl = compute_loss(model, tokenized_subset)
 print("\n--- After Training ---")
 print(f"Cross-Entropy Loss: {final_loss:.4f}")
