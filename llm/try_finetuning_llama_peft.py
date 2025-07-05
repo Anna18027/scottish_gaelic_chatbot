@@ -23,7 +23,7 @@ start_time = time.time()
 
 #set model params
 num_epochs = 1 #6 was best
-model_name = "timinar/baby-llama-58m" #"meta-llama/Llama-3.2-1B"
+model_name = "meta-llama/Llama-3.2-1B" #"timinar/baby-llama-58m"
 use_subset = True
 subset_size = 200 #200 was best so far
 batch_size = 1
@@ -94,32 +94,51 @@ def is_not_empty(example):
 model = AutoModelForCausalLM.from_pretrained(model_name)
 model.to("cpu")
 
-#LORA
+# #LORA
+# peft_config = LoraConfig(
+#     r=4,
+#     lora_alpha=64,
+#     target_modules=[
+#     "q_proj", "v_proj",
+#     "k_proj", "o_proj",             
+#     "gate_proj", "up_proj", "down_proj"
+# ],
+#     lora_dropout=0.05,
+#     bias="none",
+#     task_type=TaskType.CAUSAL_LM
+# )
+# model = get_peft_model(model, peft_config)
+# model.print_trainable_parameters()
+
+# for name, param in model.named_parameters():
+#     if "lm_head" in name:
+#         param.requires_grad = True
+
+# PEFT - only head unfrozen
+#freeze all layers except the final one
+# for name, param in model.named_parameters():
+#     if "lm_head" not in name:
+#         param.requires_grad = False
+
 peft_config = LoraConfig(
-    r=4,
-    lora_alpha=64,
+    r=2,
+    lora_alpha=8,
     target_modules=[
-    "q_proj", "v_proj",
-    "k_proj", "o_proj",             
-    "gate_proj", "up_proj", "down_proj"
+    "q_proj"
 ],
     lora_dropout=0.05,
     bias="none",
     task_type=TaskType.CAUSAL_LM
 )
+
 model = get_peft_model(model, peft_config)
-model.print_trainable_parameters()
 
+# Debug: print trainable params
+trainable_percent = get_trainable_percentage(model)
+print(f"Trainable parameters: {trainable_percent:.2f}%")
 for name, param in model.named_parameters():
-    if "lm_head" in name:
-        param.requires_grad = True
-
-# # PEFT - only head unfrozen
-# #freeze all layers except the final one
-# for name, param in model.named_parameters():
-#     if "lm_head" not in name:
-#         param.requires_grad = False
-
+    if param.requires_grad:
+        print(f"Trainable: {name}, shape: {param.shape}")
 
 
 #PEFT - embeddings, final few transformer layers and head unfrozen
