@@ -19,10 +19,10 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 #set model params
-num_epochs = 1 #6 was best
+num_epochs = 6
 model_name = "meta-llama/Llama-3.2-1B"  #"timinar/baby-llama-58m" #"meta-llama/Llama-3.2-1B"
 use_subset = True
-subset_size = 10 #200 was best so far
+subset_size = 200
 batch_size = 1
 gradient_accum_steps = 8
 logging_steps = 1
