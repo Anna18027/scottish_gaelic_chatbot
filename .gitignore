@@ -1,3 +1,9 @@
 .venv/
 llm/data/
 .DS_Store
+asr/data
+asr/BBC_CMI_1995_06_21_segments
+asr/pretrained_models
+asr/segmented_wavs
+asr/spectrograms
+asr/split_data
