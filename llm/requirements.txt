@@ -14,3 +14,6 @@ langdetect==1.0.9 #not using this
 fasttext-langdetect==1.0.5
 #fast-langdetect==0.1.0 #might stop using this
 accelerate==1.8.1
+peft==0.16.0
+requests==2.32.4
+pillow==10.3.0

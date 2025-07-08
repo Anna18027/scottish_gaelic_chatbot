@@ -7,7 +7,13 @@ print("library imports complete")
 
 # Define the model name
 #model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-model_name = "meta-llama/Llama-3.2-1B"
+model_name = "meta-llama/Llama-3.2-3B"
+
+
+print("below is hf token from python:")
+print(os.environ.get("HUGGINGFACE_HUB_TOKEN"))
+print("end of token")
+
 
 # Optional: Set a custom cache directory in your home dir
 user = os.environ["USER"]
