@@ -23,7 +23,7 @@ from peft import get_peft_model, LoraConfig, TaskType
 num_epochs = 1
 model_name = "meta-llama/Llama-3.2-1B"  #"timinar/baby-llama-58m" #"meta-llama/Llama-3.2-1B"
 use_subset = True
-subset_size = 2000
+subset_size = 20
 batch_size = 1
 gradient_accum_steps = 1 #8
 logging_steps = 1
@@ -295,7 +295,7 @@ training_args = TrainingArguments(
     logging_steps=logging_steps,
     save_total_limit=save_total_limit,
     #fp16=True if torch.cuda.is_available() else False,
-    fp16=torch.cuda.is_available(),
+    fp16=False,
     bf16=False,
     report_to="wandb",
 )
