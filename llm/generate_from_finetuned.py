@@ -33,6 +33,15 @@ prompts = [
     "Tha mi a’ dol a",
 ]
 
+english_prompts = [
+    "I think that it is",
+    "I heard the news",
+    "The day was too",
+    "They came to",
+    "I am going to",
+]
+
+
 #print results
 print("\n--- Sentence Completions Comparison ---\n")
 
