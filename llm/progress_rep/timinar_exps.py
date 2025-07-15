@@ -2,7 +2,6 @@
 
 #load libraries
 import torch
-import wandb
 import math
 from transformers import (
     AutoModelForCausalLM,
@@ -32,9 +31,8 @@ max_sequence_length = 256
 #choose peft
 peft={"none", "head only", "LORA only", "LORA and head"}
 
-#set wandb run name
+#set timestamp for file saving
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-run_name = f"test-{timestamp}"
 
 #set file paths
 train_file = "llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz" #"llm/data/temp_data/gaidhlig_test_set.txt"
@@ -43,17 +41,8 @@ output_dir = "llm/model_results/llama_finetuned"
 results_output_dir = os.path.join(output_dir, f"results_{timestamp}")
 os.makedirs(results_output_dir, exist_ok=True)
 
-#set up wandb params
-wandb.init(
-    project="timinar-finetune",
-    name=run_name,
-    config={
-        "model": model_name,
-        "epochs": num_epochs,
-        "batch_size": batch_size,
-        "grad_accum": gradient_accum_steps
-    }
-)
+#use gpu if available, otherwise cpu
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 #1. LOAD TOKENIZER & MODEL --------------------------------------------------------------------------------------
@@ -84,7 +73,7 @@ def is_not_empty(example):
 
 #load model
 model = AutoModelForCausalLM.from_pretrained(model_name)
-model.to("cpu")
+model.to(device)
 model.resize_token_embeddings(len(tokenizer))
 
 
@@ -94,9 +83,6 @@ print(model.config.max_position_embeddings)
 
 
 #2. LOAD AND TOKENIZE DATA --------------------------------------------------------------------------------------
-
-#load simple text dataset (comment if using json file instead)
-# dataset = load_dataset("text", data_files={"train": train_file}, streaming=True)
 
 #load json dataset
 dataset = load_dataset("json", data_files={"train": train_file}, split="train")
@@ -124,11 +110,6 @@ prop_tokens = subset_tokens/total_tokens
 print(f"number of tokens in dataset after subsetting: {subset_tokens}")
 print(f"proportion of tokens in dataset after subsetting: {prop_tokens}")
 
-wandb.log({
-    "num_tokens": subset_tokens,
-    "prop_tokens": prop_tokens
-})
-
 #apply tokenizer to the dataset
 tokenized_subset = dataset.map(tokenize)
 
@@ -137,7 +118,7 @@ def remove_bad_indices(tokenized_dataset, tokenizer, model):
     model.eval() 
     def is_valid(example, idx):
         try:
-            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to("cpu")
+            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to(device)
             pad_id = tokenizer.pad_token_id
             attention_mask = (input_ids != pad_id).long()
 
@@ -212,22 +193,14 @@ class EpochLossLoggerCallback(TrainerCallback):
                 if train_loss is not None and eval_loss is not None:
                     break
 
-        #log with wandb
-        if last_epoch is not None:
-            wandb.log({
-                "epoch": last_epoch,
-                "train_loss": train_loss,
-                "val_loss": eval_loss
-            })
-
 #function for computing cross entropy loss
 def compute_loss(model, dataset):
     model.eval()
     losses = []
     with torch.no_grad():
         for example in dataset:
-            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to("cpu")
-            # input_ids = torch.tensor(example["input_ids"], dtype=torch.long).unsqueeze(0).to("cpu")
+            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to(device)
+            # input_ids = torch.tensor(example["input_ids"], dtype=torch.long).unsqueeze(0).to(device)
             pad_id = int(tokenizer.pad_token_id)
             attention_mask = (input_ids != pad_id).long()
 
@@ -258,10 +231,6 @@ print("\n--- Before Training ---")
 print(f"Cross-Entropy Loss: {initial_loss:.4f}")
 print(f"Perplexity: {initial_ppl:.2f}")
 
-wandb.log({
-    "initial_loss": initial_loss,
-    "initial_perplexity": initial_ppl
-})
 
 
 #4. MODEL TRAINING ----------------------------------------------------------------------------------------------
@@ -278,7 +247,7 @@ training_args = TrainingArguments(
     logging_steps=logging_steps,
     save_total_limit=save_total_limit,
     fp16=False,
-    report_to="wandb",
+    report_to=None,
     load_best_model_at_end=True,
     metric_for_best_model="eval_loss",
     greater_is_better=False #lower loss is better
@@ -355,27 +324,18 @@ print(f"Saved raw loss values to {loss_file}")
 #6. FINISHING UP --------------------------------------------------------------------------------------------
 
 #report final loss
-model.to("cpu")
+model.to(device)
 #final_loss, final_ppl = compute_loss(model, tokenized_subset)
 final_loss, final_ppl = compute_loss(model, tokenized_val)
 print("\n--- After Training ---")
 print(f"Cross-Entropy Loss: {final_loss:.4f}")
 print(f"Perplexity: {final_ppl:.2f}")
 
-#log final loss to wandb
-wandb.log({
-    "final_loss": final_loss,
-    "final_perplexity": final_ppl
-})
-
 
 #save model 
 trainer.save_model(output_dir)
 tokenizer.save_pretrained(output_dir)
 
-
-#finish wandb run
-wandb.finish()
 print("Training completed.")
 
 
@@ -393,7 +353,7 @@ finetuned_path = "llm/model_results/llama_finetuned"
 #load fine-tuned model
 finetuned_model = AutoModelForCausalLM.from_pretrained(finetuned_path)
 finetuned_tokenizer = AutoTokenizer.from_pretrained(finetuned_path)
-finetuned_model.to("cpu")
+finetuned_model.to(device)
 finetuned_model.eval()
 
 #set up Gaelic and English prompts
@@ -423,7 +383,7 @@ for i, (gaelic_prompt, english_prompt) in enumerate(zip(prompts, english_prompts
     print(f"    ENGLISH PROMPT: {english_prompt}")
 
     # Gaelic prompt completion
-    input_ids_gaelic = finetuned_tokenizer(gaelic_prompt, return_tensors="pt").input_ids.to("cpu")
+    input_ids_gaelic = finetuned_tokenizer(gaelic_prompt, return_tensors="pt").input_ids.to(device)
     with torch.no_grad():
         output_gaelic = finetuned_model.generate(
             input_ids=input_ids_gaelic,
@@ -439,7 +399,7 @@ for i, (gaelic_prompt, english_prompt) in enumerate(zip(prompts, english_prompts
     print(f"    [GAELIC COMPLETION]:  {completion_gaelic}")
 
     # English prompt completion
-    input_ids_english = finetuned_tokenizer(english_prompt, return_tensors="pt").input_ids.to("cpu")
+    input_ids_english = finetuned_tokenizer(english_prompt, return_tensors="pt").input_ids.to(device)
     with torch.no_grad():
         output_english = finetuned_model.generate(
             input_ids=input_ids_english,
