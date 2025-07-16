@@ -1,8 +1,12 @@
 .venv/
 llm/data/
+llm/logs/
 .DS_Store
 llm/model_results/
 llm/OLD_SCRIPTS/
 llm/other_outputs/
 wandb/
 *.png
+*.txt
+data/
+hf_models/

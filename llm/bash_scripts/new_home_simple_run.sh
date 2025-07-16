@@ -3,19 +3,17 @@
 #SBATCH --output=logs/finetune-%j.out
 #SBATCH --error=logs/finetune-%j.err
 #SBATCH --time=04:00:00
-#SBATCH --partition=Teach-Standard-Noble
-#SBATCH --gres=gpu:gtx_1080_ti:1
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=64G
+#SBATCH --mem=16G
+
 
 export LLM=/home/s2751141/dissertation/scottish_gaelic_chatbot/llm
 export CHATBOT=/home/s2751141/dissertation/scottish_gaelic_chatbot 
 export DISS=/home/s2751141/dissertation 
 export SCRATCH=/disk/scratch/s2751141
 export LOGS=/home/s2751141/dissertation/scottish_gaelic_chatbot/llm/logs
-#gres=gpu:1
-#partition=PGR-Standard
-#gres=gpu:a40:1
+
 echo "SCRATCH is: $SCRATCH"
 echo "LLM is: $LLM"
 echo "CHATBOT is: $CHATBOT"
@@ -71,23 +69,10 @@ else
     pip install -r llm/requirements.txt || { echo "ERROR: Failed to install requirements"; exit 1; }
 fi
 
-echo "Does file exist?"
-test -f /disk/scratch_big/s2751141/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz && echo "✅ Found scratch big file" || echo "❌ File not found"
-
-echo "Does file exist?"
-test -f /disk/scratch/s2751141/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz && echo "✅ Found scratch file" || echo "❌ File not found"
-
-echo "Copying dataset to node-local scratch..."
-mkdir -p $SCRATCH/data/madlad_from_huggingface
-cp /home/s2751141/dissertation/scottish_gaelic_chatbot/data/gd_clean_0000.jsonl.gz $SCRATCH/data/madlad_from_huggingface/
-
-
 #run python file on scratch
 # python /disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/llm/full_finetune.py || { echo "Python script failed with exit code $?"; exit 1; }
-# python /disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/llm/home_full_finetune.py || { echo "Python script failed with exit code $?"; exit 1; }
-python /disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/llm/timinar_exps.py || { echo "Python script failed with exit code $?"; exit 1; }
+python /disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/llm/test_full_finetune.py || { echo "Python script failed with exit code $?"; exit 1; }
 
-
-# #sync outputs back from scratch to disk
-# rsync -av disk/scratch/s2751141/model_results /home/s2751141/dissertation/scottish_gaelic_chatbot/model_results
+#sync outputs back from scratch to disk
+rsync -av disk/scratch/s2751141/model_results /home/s2751141/dissertation/scottish_gaelic_chatbot/model_results
 

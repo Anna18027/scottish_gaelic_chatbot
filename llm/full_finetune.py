@@ -1,8 +1,8 @@
 #0. INITIAL SET-UP -----------------------------------------------------------------------------------------------
 
 #load libraries
-import torch
 import wandb
+import torch
 import math
 from transformers import (
     AutoModelForCausalLM,
@@ -23,38 +23,76 @@ from peft import get_peft_model, LoraConfig, TaskType
 num_epochs = 1
 model_name = "meta-llama/Llama-3.2-1B"  #"timinar/baby-llama-58m" #"meta-llama/Llama-3.2-1B"
 use_subset = True
-subset_size = 2000
+subset_size = 20
 batch_size = 1
 gradient_accum_steps = 1 #8
 logging_steps = 1
 save_total_limit = 1
 
 #set file paths
-train_file = "/exports/eddie/scratch/s2751141/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz"
-val_file = "/exports/eddie/scratch/s2751141/data/temp_data/gaidhlig_test_set.txt"
+# train_file = "/exports/eddie/scratch/s2751141/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz"
+# val_file = "/exports/eddie/scratch/s2751141/data/temp_data/gaidhlig_test_set.txt"
+train_file = "/disk/scratch/s2751141/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz"
+val_file = "/disk/scratch/s2751141/data/temp_data/gaidhlig_test_set.txt"
 
 #train_file = "llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz" #"llm/data/temp_data/gaidhlig_test_set.txt"
 #val_file = "llm/data/temp_data/gaidhlig_test_set.txt" #"llm/data/temp_data/english_test_set.txt"
-output_dir = "llm/model_results/llama_finetuned"
+output_dir = "/disk/scratch/s2751141/model_results/llama_finetuned"
 
-#set wandb run name
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-run_name = f"test-{timestamp}"
+# #set wandb run name
+# timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+# run_name = f"test-{timestamp}"
 
-#set up wandb params
-wandb.init(
-    project="tinyllama-finetune",
-    name=run_name,
-    config={
-        "model": model_name,
-        "epochs": num_epochs,
-        "batch_size": batch_size,
-        "grad_accum": gradient_accum_steps
-    }
-)
+# #set up wandb params
+# wandb.init(
+#     project="tinyllama-finetune",
+#     name=run_name,
+#     config={
+#         "model": model_name,
+#         "epochs": num_epochs,
+#         "batch_size": batch_size,
+#         "grad_accum": gradient_accum_steps
+#     }
+# )
+
+
+#NEW CODE
+use_wandb = False
+
+# print(f"use wandb: {use_wandb}")
+# try:
+#     import wandb
+#     wandb.init(project="tinyllama-finetune", mode="dryrun")
+#     use_wandb = True
+#     wandb.finish() 
+# except Exception as e:
+#     print(f"WARNING: wandb not available or cannot connect: {e}")
+#     class DummyWandb:
+#         def log(self, *args, **kwargs): pass
+#         def finish(self, *args, **kwargs): pass
+#     wandb = DummyWandb()
+
+# print(f"use wandb: {use_wandb}")
+# if use_wandb:
+#     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+#     run_name = f"test-{timestamp}"
+#     wandb.init(
+#         project="tinyllama-finetune",
+#         name=run_name,
+#         config={
+#             "model": "meta-llama/Llama-3.2-1B",
+#             "epochs": 1,
+#             "batch_size": 1,
+#             "grad_accum": 1
+#         }
+#     )
+# else:
+#     print("Proceeding without wandb logging.")
 
 #set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 #1. LOAD TOKENIZER & MODEL --------------------------------------------------------------------------------------
 
 
@@ -65,7 +103,7 @@ print("below is hf token from python:")
 print(os.environ.get("HUGGINGFACE_HUB_TOKEN"))
 print("end of token")
 
-model_path = "/exports/eddie/scratch/s2751141/hf_models/models--meta-llama--Llama-3.2-1B"
+model_path = "/disk/scratch/s2751141/hf_models/llama_3_2_1B"
 
 print("starting to load model")
 
@@ -75,6 +113,22 @@ print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
 torch.cuda.empty_cache()
 print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
 print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
+
+print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
+print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
+
+
+# Load model
+model = AutoModelForCausalLM.from_pretrained(
+    model_path,
+    torch_dtype=torch.float16,
+    device_map="auto",
+    local_files_only=True,
+    use_auth_token=False
+)
+# .to("cuda" if torch.cuda.is_available() else "cpu")
+
+print("model loaded")
 
 # Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(
@@ -86,20 +140,6 @@ tokenizer = AutoTokenizer.from_pretrained(
 print("tokenizer loaded")
 print("Vocab size before adding pad token:", len(tokenizer))
 
-print("Allocated:", torch.cuda.memory_allocated() / 1e9, "GB")
-print("Cached:", torch.cuda.memory_reserved() / 1e9, "GB")
-
-
-# Load model
-model = AutoModelForCausalLM.from_pretrained(
-    model_path,
-    torch_dtype=torch.float16,
-    device_map="auto",
-    local_files_only=True
-)
-# .to("cuda" if torch.cuda.is_available() else "cpu")
-
-print("model loaded")
 
 print("Before gradient checkpointing enabled:", model.is_gradient_checkpointing)
 model.gradient_checkpointing_disable()  # just in case, to reset
@@ -297,7 +337,8 @@ training_args = TrainingArguments(
     #fp16=True if torch.cuda.is_available() else False,
     fp16=torch.cuda.is_available(),
     bf16=False,
-    report_to="wandb",
+    # report_to="wandb",
+    report_to="none",
 )
 
 #set up model trainger
