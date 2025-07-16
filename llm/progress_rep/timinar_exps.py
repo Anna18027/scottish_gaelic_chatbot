@@ -18,10 +18,10 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 #set model params
-num_epochs = 10
+num_epochs = 2
 model_name = "timinar/baby-llama-58m"
 use_subset = True
-subset_size = 20000
+subset_size = 20
 batch_size = 16
 gradient_accum_steps = 8
 logging_steps = 1
@@ -174,24 +174,24 @@ data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 #3. REPORT INITIAL LOSS ------------------------------------------------------------------------------------------
 
 #set class for loss logging
-class EpochLossLoggerCallback(TrainerCallback):
-    def on_epoch_end(self, args, state, control, **kwargs):
-        #initialise
-        last_epoch = None
-        train_loss = None
-        eval_loss = None
+# class EpochLossLoggerCallback(TrainerCallback):
+#     def on_epoch_end(self, args, state, control, **kwargs):
+#         #initialise
+#         last_epoch = None
+#         train_loss = None
+#         eval_loss = None
 
-        #get most recent losses
-        for log in reversed(state.log_history):
-            if "epoch" in log:
-                if "loss" in log:
-                    train_loss = log["loss"]
-                    last_epoch = log["epoch"]
-                if "eval_loss" in log:
-                    eval_loss = log["eval_loss"]
-                    last_epoch = log["epoch"]
-                if train_loss is not None and eval_loss is not None:
-                    break
+#         #get most recent losses
+#         for log in reversed(state.log_history):
+#             if "epoch" in log:
+#                 if "loss" in log:
+#                     train_loss = log["loss"]
+#                     last_epoch = log["epoch"]
+#                 if "eval_loss" in log:
+#                     eval_loss = log["eval_loss"]
+#                     last_epoch = log["epoch"]
+#                 if train_loss is not None and eval_loss is not None:
+#                     break
 
 #function for computing cross entropy loss
 def compute_loss(model, dataset):
@@ -244,7 +244,7 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=gradient_accum_steps,
     num_train_epochs=num_epochs,
     logging_dir="./logs",
-    logging_steps=logging_steps,
+    logging_steps="epoch",
     save_total_limit=save_total_limit,
     fp16=False,
     report_to=None,
@@ -261,8 +261,8 @@ trainer = Trainer(
     eval_dataset = tokenized_val,
     #eval_dataset = tokenized_subset,
     tokenizer=tokenizer,
-    data_collator=data_collator,
-    callbacks = [EpochLossLoggerCallback()]
+    data_collator=data_collator
+    # callbacks = [EpochLossLoggerCallback()]
 )
 
 #train the model
