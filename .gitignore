@@ -6,3 +6,8 @@ wandb/
 *.png
 llm/OLD_SCRIPTS/
 llm/other_outputs/
+llm/finetune/__pycache__/
+llm/finetune/results/
+llm/finetune/saved_model/
+llm/finetune_OLD/
+llm/progress_rep/TEMP_SCRIPTS/

@@ -3,6 +3,10 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser(description="Fine-tune Baby Llama model")
 
+    #run mode
+    parser.add_argument("--mode", type=str, choices=["interactive", "gridsearch_local", "gridsearch_cluster"], default="interactive",
+                    help="Run mode: interactive runs training directly, gridsearch submits sbatch jobs")
+
     #model name
     parser.add_argument("--model_name", type=str, default="timinar/baby-llama-58m", help="Name of huggingface model")
 

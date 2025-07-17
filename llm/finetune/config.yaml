@@ -1,0 +1,28 @@
+#model
+model_name: timinar/baby-llama-58m
+
+#data and file paths
+train_file: llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz
+val_file: llm/data/temp_data/gaidhlig_test_set.txt
+output_dir: llm/finetune/results
+saved_model_dir: llm/finetune/saved_model
+subset_size: 20
+
+#max epochs - best epoch results saved, early stopping may kick in earlier
+num_epochs: 2
+
+#training hyperparams - use list for gridsearch
+batch_size: [8, 16]
+learning_rate: 3e-5
+max_sequence_length: 256
+gradient_accum_steps: 8
+save_total_limit: 1
+
+#PEFT
+peft: ["none"]
+
+#generation
+max_new_tokens: 30
+temperature: 0.8
+top_p: 0.9
+do_sample: True
