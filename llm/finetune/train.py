@@ -10,9 +10,12 @@ from transformers import (
     Trainer,
     TrainingArguments,
     DataCollatorForLanguageModeling,
+    EarlyStoppingCallback,
+    AutoConfig
 )
 from types import SimpleNamespace
 from datasets import load_dataset
+from peft import LoraConfig, get_peft_model, TaskType, PeftConfig, PeftModel
 from train_functions import remove_bad_indices, is_not_empty, get_elapsed_time, compute_loss
 
 def kwargs_to_args(kwargs):
@@ -32,9 +35,55 @@ def load_model_and_tokenizer(device, start_time, args):
     tokenizer.pad_token = "<|pad|>"
     tokenizer.pad_token_id = tokenizer.convert_tokens_to_ids("<|pad|>")
 
+    print("1")
+    print("Training tokenizer vocab size:", len(tokenizer))
+    print("Added tokens:", tokenizer.added_tokens_encoder)
+
     model = AutoModelForCausalLM.from_pretrained(args.model_name)
+
+    # Default: full finetuning
+    for param in model.parameters():
+        param.requires_grad = True
+
+    if args.peft_mode == "lora" or args.peft_mode == "lora+head":
+        lora_config = LoraConfig(
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            target_modules=["q_proj", "v_proj"], #TEMP: swap out for args!
+            lora_dropout=args.lora_dropout,
+            bias="none",
+            task_type=TaskType.CAUSAL_LM,
+        )
+        model = get_peft_model(model, lora_config)
+
+        # After applying LoRA, freeze all base model parameters
+        for name, param in model.named_parameters():
+            param.requires_grad = False
+        # Re-enable gradients for LoRA modules
+        for name, param in model.named_parameters():
+            if "lora_" in name:
+                param.requires_grad = True
+
+    if args.peft_mode in ["head-only", "lora+head"]:
+        # Enable gradients for output head
+        for name, param in model.named_parameters():
+            if "lm_head" in name:
+                param.requires_grad = True
+
+
+    print("2")
+    print("Training tokenizer vocab size:", len(tokenizer))
+    print("Added tokens:", tokenizer.added_tokens_encoder)
+
+
     model.resize_token_embeddings(len(tokenizer))
     model.to(device)
+
+    print("3")
+    print("Training tokenizer vocab size:", len(tokenizer))
+    print("Added tokens:", tokenizer.added_tokens_encoder)
+
+
 
     print(f"1. Load tokenizer and model is complete. Total time taken:{get_elapsed_time(start_time)}")
     return tokenizer, model
@@ -118,6 +167,7 @@ def train_model(model, tokenizer, tokenized_subset, tokenized_val, data_collator
         eval_dataset=tokenized_val,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=args.early_stopping_patience)]
     )
 
     trainer.train()
@@ -181,6 +231,7 @@ def finishing_up(model, tokenizer, trainer, tokenized_val, device, output_dir, s
     print(f"Cross-Entropy Loss: {final_loss:.4f}")
     print(f"Perplexity: {final_ppl:.2f}")
 
+    # model.config.vocab_size = len(tokenizer)
     trainer.save_model(args.saved_model_dir)
     tokenizer.save_pretrained(args.saved_model_dir)
     print("Training completed.")
@@ -190,10 +241,31 @@ def finishing_up(model, tokenizer, trainer, tokenized_val, device, output_dir, s
 def generate_samples(finetuned_path, device, start_time, timestamp, output_dir,
                      best_epoch_num, best_val_loss, final_loss, final_ppl,
                      bad_indices_train, bad_indices_val, args):
-    finetuned_model = AutoModelForCausalLM.from_pretrained(finetuned_path)
+    # finetuned_model = AutoModelForCausalLM.from_pretrained(finetuned_path)
+    # finetuned_tokenizer = AutoTokenizer.from_pretrained(finetuned_path)
     finetuned_tokenizer = AutoTokenizer.from_pretrained(finetuned_path)
-    finetuned_model.to(device)
+
+    if finetuned_tokenizer.pad_token is None:
+        finetuned_tokenizer.add_tokens(["<|pad|>"])
+        finetuned_tokenizer.pad_token = "<|pad|>"
+        finetuned_tokenizer.pad_token_id = finetuned_tokenizer.convert_tokens_to_ids("<|pad|>")
+
+    # 2. Load PEFT config (includes base model name)
+    peft_config = PeftConfig.from_pretrained(finetuned_path)
+
+    # 3. Load base model with adjusted vocab size
+    base_config = AutoConfig.from_pretrained(peft_config.base_model_name_or_path)
+    base_config.vocab_size = len(finetuned_tokenizer)
+
+    base_model = AutoModelForCausalLM.from_config(base_config)
+    base_model.resize_token_embeddings(len(finetuned_tokenizer))
+
+    # 4. Load LoRA adapter on top of the base model
+    finetuned_model = PeftModel.from_pretrained(base_model, finetuned_path)
+
+    # ✅ Now ready to generate
     finetuned_model.eval()
+    finetuned_model.to(device)
 
     prompts = [
         "Tha mi a’ smaoineachadh gu bheil e",
@@ -261,6 +333,11 @@ def generate_samples(finetuned_path, device, start_time, timestamp, output_dir,
         "num_epochs": args.num_epochs,
         "max_sequence_length": args.max_sequence_length,
         "subset_size": args.subset_size if args.subset_size > 0 else "full dataset",
+        "peft_mode": args.peft_mode,
+        "lora_r": args.lora_r,
+        "lora_alpha": args.lora_alpha,
+        "lora_dropout": args.lora_dropout,
+        "lora_target_modules": ["q_proj", "v_proj"], #args.lora_target_modules,
         "best_epoch": best_epoch_num,
         "best_val_loss": best_val_loss,
         "best_loss": final_loss,

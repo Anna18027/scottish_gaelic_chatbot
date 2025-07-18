@@ -2,17 +2,17 @@
 model_name: timinar/baby-llama-58m
 
 #data and file paths
-train_file: llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz
-val_file: llm/data/temp_data/gaidhlig_test_set.txt
-output_dir: llm/finetune/results
-saved_model_dir: llm/finetune/saved_model
-subset_size: 20
+train_file: /home/s2751141/dissertation/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz
+val_file: /home/s2751141/dissertation/data/temp_data/gaidhlig_test_set.txt
+output_dir: /home/s2751141/dissertation/finetune/results
+saved_model_dir: /home/s2751141/dissertation/finetune/saved_model
+subset_size: [20, 200]
 
 #max epochs - best epoch results saved, early stopping may kick in earlier
 num_epochs: 2
 
 #training hyperparams - use list for gridsearch
-batch_size: 8
+batch_size: [8, 16]
 learning_rate: 3e-5
 max_sequence_length: 256
 gradient_accum_steps: 8
@@ -25,7 +25,6 @@ lora_r: 8
 lora_alpha: 16
 lora_dropout: 0.1
 lora_target_modules: ["q_proj", "v_proj"]
-
 
 #generation
 max_new_tokens: 30

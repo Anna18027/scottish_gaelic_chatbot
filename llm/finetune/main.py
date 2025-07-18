@@ -3,11 +3,13 @@ from datetime import datetime
 from copy import deepcopy
 from itertools import product
 import os
+import shutil
 from utils import load_config, get_run_mode
 from train import run_training
 
 #load config file
 config_path = "llm/finetune/config.yaml"
+# config_path = "llm/finetune/default_config.yaml"
 config = load_config(config_path)
 
 #set up run mode
@@ -18,6 +20,10 @@ run_id = datetime.now().strftime("run_%Y%m%d_%H%M%S")
 base_output_dir = os.path.join(config["output_dir"], run_id)
 os.makedirs(base_output_dir, exist_ok=True)
 timestamp = run_id[len("run_"):]
+
+#save config file to the output folder
+saved_config_path = os.path.join(base_output_dir, "used_config.yaml")
+shutil.copyfile(config_path, saved_config_path)
 
 #run training script (looped if needed)
 if mode == "interactive":

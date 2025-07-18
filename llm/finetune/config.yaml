@@ -6,20 +6,25 @@ train_file: llm/data/madlad_from_huggingface/gd_clean_0000.jsonl.gz
 val_file: llm/data/temp_data/gaidhlig_test_set.txt
 output_dir: llm/finetune/results
 saved_model_dir: llm/finetune/saved_model
-subset_size: 20
+subset_size: [20, 200, 2000, 20000]
 
 #max epochs - best epoch results saved, early stopping may kick in earlier
-num_epochs: 2
+num_epochs: 20
 
 #training hyperparams - use list for gridsearch
-batch_size: [8, 16]
+batch_size: [8, 16, 32]
 learning_rate: 3e-5
-max_sequence_length: 256
-gradient_accum_steps: 8
+max_sequence_length: [256, 512]
+gradient_accum_steps: [8, 16]
 save_total_limit: 1
+early_stopping_patience: 3
 
 #PEFT
-peft: ["none"]
+peft_mode: ["none", "lora", "head-only", "lora+head"] # Options: "none", "lora", "head-only", "lora+head"
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.1
+lora_target_modules: "q_proj"
 
 #generation
 max_new_tokens: 30
