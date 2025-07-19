@@ -6,7 +6,8 @@ cwd = os.getcwd()
 
 if "s2751141" in cwd:
     print("Cluster version (mlp)")
-    chatbot_dir = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
+    # chatbot_dir = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
+    chatbot_dir = "/home/s2751141/dissertation/scottish_gaelic_chatbot"
 else:
     print("Local version")
     chatbot_dir = "/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
