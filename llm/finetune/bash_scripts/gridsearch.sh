@@ -1,24 +1,32 @@
 #!/bin/bash
-# gridsearch_local.sh
 
 # Set filepaths based on local or cluster run
 if [[ "$(hostname)" == *"mlp"* ]]; then
-    CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
+    SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
+    HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=true
 else
-    CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
+    SCRATCH_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
+    HOME_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=false
 fi
 
-echo "Using CHATBOT_DIR: $CHATBOT_DIR"
+echo "Using HOME_CHATBOT_DIR: $HOME_CHATBOT_DIR"
+echo "Using SCRATCH_CHATBOT_DIR: $SCRATCH_CHATBOT_DIR"
 
-# Set relative filepaths
-FINETUNE_DIR="$CHATBOT_DIR/llm/finetune"
-RUN_DIR="$FINETUNE_DIR/results/run_20250718_140851"
-SAVE_DIR="$FINETUNE_DIR/saved_model" 
-VENV_PATH="$CHATBOT_DIR/.venv"
-REQUIREMENTS_FILE="$CHATBOT_DIR/llm/requirements.txt"
+#set filepaths for home
+HOME_FINETUNE_DIR="$HOME_CHATBOT_DIR/llm/finetune"
+RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250718_140851"
+SAVE_DIR="$HOME_FINETUNE_DIR/saved_model" 
 GRID_FILE="$RUN_DIR/grid_params.txt"
+
+#set filepaths for scratch
+SCRATCH_FINETUNE_DIR="$SCRATCH_CHATBOT_DIR/llm/finetune"
+VENV_PATH="$SCRATCH_CHATBOT_DIR/.venv"
+REQUIREMENTS_FILE="$SCRATCH_CHATBOT_DIR/llm/requirements.txt"
+
+echo "progress check"
+
 
 # Only activate or create venv if on cluster
 if $ON_CLUSTER; then
@@ -33,6 +41,8 @@ if $ON_CLUSTER; then
         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     fi
 fi
+
+echo "progress check 2"
 
 # Check total number of tasks
 TOTAL_JOBS=$(wc -l < "$GRID_FILE")
@@ -49,7 +59,7 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
 
     START_TIME=$(date +%s)
 
-    python3 "$FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$RUN_DIR" --save_dir "$SAVE_DIR" --log_dir "$LOG_DIR" > "$LOG_FILE" 2>&1
+    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$RUN_DIR" --save_dir "$SAVE_DIR" --log_dir "$LOG_DIR" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)
