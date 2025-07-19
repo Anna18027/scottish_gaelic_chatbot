@@ -1,4 +1,12 @@
 #!/bin/bash
+#SBATCH --job-name=finetune-llm
+#SBATCH --output=logs/finetune-%j.out
+#SBATCH --error=logs/finetune-%j.err
+#SBATCH --time=04:00:00
+#SBATCH --partition=Teach-Standard-Noble
+#SBATCH --gres=gpu:gtx_1080_ti:1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=64G
 
 # Set filepaths based on local or cluster run
 if [[ "$(hostname)" == *"mlp"* ]]; then
@@ -16,8 +24,8 @@ echo "Using SCRATCH_CHATBOT_DIR: $SCRATCH_CHATBOT_DIR"
 
 #set filepaths for home
 HOME_FINETUNE_DIR="$HOME_CHATBOT_DIR/llm/finetune"
-# RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250718_140851"
-RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250719_190746"
+RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250718_140851" #home
+# RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250719_190746" #cluster
 SAVE_DIR="$HOME_FINETUNE_DIR/saved_model" 
 GRID_FILE="$RUN_DIR/grid_params.txt"
 
