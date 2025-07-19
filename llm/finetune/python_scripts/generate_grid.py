@@ -1,13 +1,14 @@
 import itertools
 import os
 from datetime import datetime
-import socket
 
-hostname = socket.gethostname()
+cwd = os.getcwd()
 
-if "mlp" in hostname:
+if "s2751141" in cwd:
+    print("Cluster version (mlp)")
     chatbot_dir = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
 else:
+    print("Local version")
     chatbot_dir = "/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
 
 base_dir = os.path.join(chatbot_dir, "llm", "finetune", "results")
