@@ -185,4 +185,15 @@ def compute_loss(model, dataset, tokenizer, device, batch_size=16):
 
     avg_loss = sum(losses) / len(losses)
     perplexity = math.exp(avg_loss)
+
     return avg_loss, perplexity
+
+
+def get_json_tokens(tokenized_data, tokenizer, batch_size=1000):
+    texts = list(tokenized_data["text"])
+    total_tokens = 0
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i+batch_size]
+        batch_encoding = tokenizer(batch, truncation=False, padding=False)
+        total_tokens += sum(len(ids) for ids in batch_encoding["input_ids"])
+    return total_tokens

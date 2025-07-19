@@ -11,3 +11,5 @@ llm/finetune/results/
 llm/finetune/saved_model/
 llm/finetune_OLD/
 llm/progress_rep/TEMP_SCRIPTS/
+llm/finetune/python_scripts/__pycache__/
+llm/finetune/TEMP_OLD/
