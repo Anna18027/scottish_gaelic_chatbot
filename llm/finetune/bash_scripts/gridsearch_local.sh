@@ -1,13 +1,25 @@
 #!/bin/bash
 # gridsearch_local.sh
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" #up one directory from this bash script
-echo "Script directory is $SCRIPT_DIR"
+#set filepaths - change between local and cluster
+CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
+FINETUNE_DIR="$CHATBOT_DIR/llm/finetune"
+RUN_DIR="$FINETUNE_DIR/results/run_20250718_140851"
+SAVE_DIR="$FINETUNE_DIR/saved_model" 
 
-RUN_DIR="$SCRIPT_DIR/results/run_20250718_140851"
+#path to grid file (no change between runs)
 GRID_FILE="$RUN_DIR/grid_params.txt"
-# LOG_DIR="$RUN_DIR/logs"
-SAVE_DIR="$SCRIPT_DIR/saved_model"
+
+# echo "Chatbot dir is $CHATBOT_DIR"
+
+
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" #up one directory from this bash script
+# echo "Script directory is $SCRIPT_DIR"
+
+# RUN_DIR="$SCRIPT_DIR/results/run_20250718_140851"
+# GRID_FILE="$RUN_DIR/grid_params.txt"
+# # LOG_DIR="$RUN_DIR/logs"
+# SAVE_DIR="$SCRIPT_DIR/saved_model"
 
 # mkdir -p "$LOG_DIR"
 
@@ -22,6 +34,8 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     LOG_FILE="$LOG_DIR/output.log"
 
     mkdir -p "$LOG_DIR" 
+
+    echo "log dir is $LOG_DIR"
 
     # echo "[$RUN_NAME] Params: $PARAM_STRING"
     # echo "Started at $(date)" > "$LOG_FILE"
