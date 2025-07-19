@@ -1,8 +1,20 @@
 import itertools
 import os
 from datetime import datetime
+import socket
 
-base_dir = "llm/finetune/results/"
+hostname = socket.gethostname()
+
+if "mlp" in hostname:
+    chatbot_dir = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
+else:
+    chatbot_dir = "/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
+
+base_dir = os.path.join(chatbot_dir, "llm", "finetune", "results")
+
+print("Using base_dir:", base_dir)
+
+# base_dir = "llm/finetune/results/"
 
 # === 1. Define All Parameters Here ===
 
