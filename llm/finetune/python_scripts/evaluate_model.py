@@ -13,6 +13,7 @@ from transformers import (
 )
 from types import SimpleNamespace
 from datasets import load_dataset
+from train_functions import compute_loss
 
 
 def save_losses_and_plot(trainer, args):
