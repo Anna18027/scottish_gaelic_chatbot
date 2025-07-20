@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=finetune-llm
-#SBATCH --output=/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/llm/finetune/error_logs/finetune-%j.out
-#SBATCH --error==/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/llm/finetune/error_logs/finetune-%j.out
+#SBATCH --output=/home/s2751141/dissertation/scottish_gaelic_chatbot/llm/finetune/error_logs/finetune-%j.out
+#SBATCH --error==/home/s2751141/dissertation/scottish_gaelic_chatbot/llm/finetune/error_logs/finetune-%j.out
 #SBATCH --time=04:00:00
 #SBATCH --partition=Teach-Standard-Noble
 #SBATCH --gres=gpu:gtx_1080_ti:1
