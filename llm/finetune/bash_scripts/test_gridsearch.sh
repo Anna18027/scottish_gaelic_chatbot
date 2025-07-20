@@ -1,0 +1,56 @@
+#!/bin/bash
+
+#create folder for bash logs
+mkdir -p test_logs
+
+#SBATCH --job-name=finetune-llm
+#SBATCH --output=test_logs/finetune-%j.out
+#SBATCH --error=test_logs/finetune-%j.err
+#SBATCH --time=04:00:00
+#SBATCH --partition=Teach-Standard-Noble
+#SBATCH --gres=gpu:gtx_1080_ti:1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=64G
+
+#set filepaths
+SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
+HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
+VENV_PATH="$SCRATCH_CHATBOT_DIR/.venv"
+REQUIREMENTS_FILE="$SCRATCH_CHATBOT_DIR/llm/requirements.txt"
+
+HOME_DATA_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot/data"
+HOME_DATA_FILE="$HOME_DATA_DIR/temp_data/english_test_set.txt"
+SCRATCH_DATA_DIR="$SCRATCH_CHATBOT_DIR/data"
+
+#copy project folder across to scratch
+mkdir -p "$SCRATCH_CHATBOT_DIR/llm"
+rsync -a --delete "$HOME_CHATBOT_DIR/llm/" \
+                "$SCRATCH_CHATBOT_DIR/llm" \
+  || { echo " ERROR: rsync failed"; exit 1; }
+
+#activate venv in scratch
+if [ -f "$VENV_PATH/bin/activate" ]; then
+    echo "Activating existing virtual environment..."
+    source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+    pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+else
+    echo "WARNING: Virtual environment not found; creating new one..."
+    python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
+    source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+    pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+fi
+
+echo "Before data copied"
+
+#copy data across to scratch
+mkdir "$SCRATCH_DATA_DIR"
+cp "$HOME_DATA_FILE" "$SCRATCH_DATA_DIR"
+echo "Data copied"
+
+#run python file from scratch
+python "$SCRATCH_CHATBOT_DIR/llm/finetune/python_scripts/test_gridsearch.py" || { echo "Python script failed with exit code $?"; exit 1; }
+
+#copy outputs back to home
+mkdir -p "$HOME_CHATBOT_DIR/test_results"
+rsync -av "$SCRATCH_CHATBOT_DIR/test_results" "$HOME_CHATBOT_DIR/test_results"
+
