@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=finetune-llm
-#SBATCH --output=logs/finetune-%j.out
-#SBATCH --error=logs/finetune-%j.err
+#SBATCH --output=test_logs/finetune-%j.out
+#SBATCH --error=test_logs/finetune-%j.err
 #SBATCH --time=04:00:00
 #SBATCH --partition=Teach-Standard-Noble
 #SBATCH --gres=gpu:gtx_1080_ti:1
