@@ -12,6 +12,8 @@ mkdir -p test_logs
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 
+echo "Hello"
+
 #set filepaths
 SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
 HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
