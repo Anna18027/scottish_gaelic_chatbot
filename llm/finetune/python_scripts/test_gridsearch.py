@@ -41,7 +41,7 @@ def main():
 
         print("File read complete.")
 
-        test_output_file = os.path.join(output_dir, "results.txt")
+        test_output_file = os.path.join(output_dir, "results_NEW.txt")
         with open(test_output_file, 'w') as f:
             f.write(lines[0].strip())
 
