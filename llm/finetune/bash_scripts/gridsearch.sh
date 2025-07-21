@@ -104,3 +104,4 @@ if $ON_CLUSTER; then
         echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
         exit 1
     fi
+fi
