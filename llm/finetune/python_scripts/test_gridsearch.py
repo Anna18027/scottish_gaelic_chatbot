@@ -51,7 +51,6 @@ def main():
     except Exception as e:
         print(f" An error occurred: {e}")
 
-    print(f"Results written to {test_output_file}")
     print("Script complete.")
 
 if __name__ == "__main__":
