@@ -70,7 +70,7 @@ fi
 echo "progress check 2"
 
 #get total number of tasks
-TOTAL_JOBS=$(wc -l < "$GRID_FILE")
+TOTAL_JOBS=$(wc -l < "$SCRATCH_GRID_FILE")
 
 #run python script for each task
 for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
@@ -98,6 +98,8 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     fi
 done
 
+echo "progress check 3"
+
 #copy outputs back to home
 if $ON_CLUSTER; then
     if [ -d "$SCRATCH_RUN_DIR" ]; then
@@ -107,3 +109,5 @@ if $ON_CLUSTER; then
         exit 1
     fi
 fi
+
+echo "bash script complete"
