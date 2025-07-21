@@ -30,7 +30,7 @@ def main():
 
     #open data file
     # file_path = "/home/s2751141/dissertation/scottish_gaelic_chatbot/data/temp_data/english_test_set.txt"
-    file_path = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/data/temp_data/english_test_set.txt"
+    file_path = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/data/english_test_set.txt"
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
