@@ -41,7 +41,7 @@ fi
 echo "Before data copied"
 
 #copy data across to scratch
-mkdir "$SCRATCH_DATA_DIR"
+mkdir -p "$SCRATCH_DATA_DIR"
 cp "$HOME_DATA_FILE" "$SCRATCH_DATA_DIR"
 echo "Data copied"
 
@@ -49,6 +49,13 @@ echo "Data copied"
 python "$SCRATCH_CHATBOT_DIR/llm/finetune/python_scripts/test_gridsearch.py" || { echo "Python script failed with exit code $?"; exit 1; }
 
 #copy outputs back to home
-mkdir -p "$HOME_CHATBOT_DIR/test_results"
-rsync -av "$SCRATCH_CHATBOT_DIR/test_results" "$HOME_CHATBOT_DIR/test_results"
+# mkdir -p "$HOME_CHATBOT_DIR/test_results"
+# rsync -av "$SCRATCH_CHATBOT_DIR/test_results" "$HOME_CHATBOT_DIR/test_results"
+
+if [ -d "$SCRATCH_CHATBOT_DIR/test_results" ]; then
+    rsync -av "$SCRATCH_CHATBOT_DIR/test_results/" "$HOME_CHATBOT_DIR/test_results/"
+else
+    echo "ERROR: test_results not found in $SCRATCH_CHATBOT_DIR"
+    exit 1
+fi
 
