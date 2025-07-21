@@ -1,14 +1,17 @@
 #!/bin/bash
-#SBATCH --job-name=finetune-llm
-#SBATCH --output=/home/s2751141/dissertation/scottish_gaelic_chatbot/llm/finetune/error_logs/finetune-%j.out
-#SBATCH --error==/home/s2751141/dissertation/scottish_gaelic_chatbot/llm/finetune/error_logs/finetune-%j.out
+#SBATCH --job-name=finetune-grid
+#SBATCH --output=logs/finetune-%j.out
+#SBATCH --error=logs/finetune-%j.err
 #SBATCH --time=04:00:00
 #SBATCH --partition=Teach-Standard-Noble
 #SBATCH --gres=gpu:gtx_1080_ti:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 
-# Set filepaths based on local or cluster run
+#set run id
+RUN_ID="20250719_190746"
+
+#set filepaths based on local or cluster run
 if [[ "$(hostname)" == *"mlp"* ]]; then
     SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
@@ -22,22 +25,33 @@ fi
 echo "Using HOME_CHATBOT_DIR: $HOME_CHATBOT_DIR"
 echo "Using SCRATCH_CHATBOT_DIR: $SCRATCH_CHATBOT_DIR"
 
-#set filepaths for home
-HOME_FINETUNE_DIR="$HOME_CHATBOT_DIR/llm/finetune"
-RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250718_140851" #home
-# RUN_DIR="$HOME_FINETUNE_DIR/results/run_20250719_190746" #cluster
-SAVE_DIR="$HOME_FINETUNE_DIR/saved_model" 
-GRID_FILE="$RUN_DIR/grid_params.txt"
-
-#set filepaths for scratch
-SCRATCH_FINETUNE_DIR="$SCRATCH_CHATBOT_DIR/llm/finetune"
+#set output filepaths for scratch
 VENV_PATH="$SCRATCH_CHATBOT_DIR/.venv"
 REQUIREMENTS_FILE="$SCRATCH_CHATBOT_DIR/llm/requirements.txt"
+SCRATCH_DATA_DIR="$SCRATCH_CHATBOT_DIR/data"
+SCRATCH_FINETUNE_DIR="$SCRATCH_CHATBOT_DIR/llm/finetune"
+SCRATCH_RUN_DIR="$SCRATCH_FINETUNE_DIR/results/run_$RUN_ID"
+SCRATCH_SAVE_DIR="$SCRATCH_FINETUNE_DIR/saved_model" 
+SCRATCH_GRID_FILE="$SCRATCH_RUN_DIR/grid_params.txt"
 
-echo "progress check"
+#set output filepaths for home (after copying from scratch)
+HOME_DATA_DIR="$HOME_CHATBOT_DIR/data"
+HOME_FINETUNE_DIR="$HOME_CHATBOT_DIR/llm/finetune"
+HOME_RUN_DIR="$HOME_FINETUNE_DIR/results/run_$RUN_ID"
+HOME_SAVE_DIR="$HOME_FINETUNE_DIR/saved_model" 
+HOME_GRID_FILE="$HOME_RUN_DIR/grid_params.txt"
 
+#copy data across to scratch
+if $ON_CLUSTER; then
+    mkdir -p "$SCRATCH_DATA_DIR"
+    rsync -a "$HOME_DATA_DIR/" "$SCRATCH_DATA_DIR/" || { echo "ERROR: Failed to copy data folder to scratch"; exit 1; }
 
-# Only activate or create venv if on cluster
+#copy project folder across to scratch
+if $ON_CLUSTER; then
+    mkdir -p "$SCRATCH_CHATBOT_DIR/llm"
+    rsync -a --delete "$HOME_CHATBOT_DIR/llm/" "$SCRATCH_CHATBOT_DIR/llm" || { echo " ERROR: rsync failed"; exit 1; }
+
+#activate venv and install requirements
 if $ON_CLUSTER; then
     if [ -f "$VENV_PATH/bin/activate" ]; then
         echo "Activating existing virtual environment..."
@@ -53,10 +67,10 @@ fi
 
 echo "progress check 2"
 
-# Check total number of tasks
+#get total number of tasks
 TOTAL_JOBS=$(wc -l < "$GRID_FILE")
 
-# Run python script for each task
+#run python script for each task
 for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     echo "==== Running task $TASK_ID of $TOTAL_JOBS ===="
 
@@ -81,3 +95,12 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
         echo "Task $TASK_ID/$TOTAL_JOBS completed successfully in $DURATION seconds"
     fi
 done
+
+#copy outputs back to home
+if $ON_CLUSTER; then
+    if [ -d "$SCRATCH_RUN_DIR" ]; then
+        rsync -av "$SCRATCH_RUN_DIR/" "$HOME_RUN_DIR/"
+    else
+        echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
+        exit 1
+    fi
