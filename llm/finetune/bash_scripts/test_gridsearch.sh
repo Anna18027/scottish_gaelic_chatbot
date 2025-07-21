@@ -21,7 +21,7 @@ HOME_DATA_FILE="$HOME_DATA_DIR/temp_data/english_test_set.txt"
 SCRATCH_DATA_DIR="$SCRATCH_CHATBOT_DIR/data"
 
 # OUTPUT_DIR="$SCRATCH_CHATBOT_DIR/test_results"
-OUTPUT_DIR="$HOME_CHATBOT_DIR/test_results"
+OUTPUT_DIR="$SCRATCH_CHATBOT_DIR/test_results"
 
 #copy project folder across to scratch
 mkdir -p "$SCRATCH_CHATBOT_DIR/llm"

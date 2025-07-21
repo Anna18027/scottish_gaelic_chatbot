@@ -29,7 +29,8 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     #open data file
-    file_path = "/home/s2751141/dissertation/scottish_gaelic_chatbot/data/temp_data/english_test_set.txt"
+    # file_path = "/home/s2751141/dissertation/scottish_gaelic_chatbot/data/temp_data/english_test_set.txt"
+    file_path = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot/data/temp_data/english_test_set.txt"
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -41,7 +42,7 @@ def main():
 
         print("File read complete.")
 
-        test_output_file = os.path.join(output_dir, "results_NEW.txt")
+        test_output_file = os.path.join(output_dir, "results_ANNA.txt")
         with open(test_output_file, 'w') as f:
             f.write(lines[0].strip())
 
