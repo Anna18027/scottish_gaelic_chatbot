@@ -48,10 +48,12 @@ echo "Data copied"
 #run python file from scratch
 python "$SCRATCH_CHATBOT_DIR/llm/finetune/python_scripts/test_gridsearch.py" || { echo "Python script failed with exit code $?"; exit 1; }
 
-#copy outputs back to home
-# mkdir -p "$HOME_CHATBOT_DIR/test_results"
-# rsync -av "$SCRATCH_CHATBOT_DIR/test_results" "$HOME_CHATBOT_DIR/test_results"
+#debugging
+echo "SCRATCH dir: $SCRATCH_CHATBOT_DIR"
+hostname
+ls -l "$SCRATCH_CHATBOT_DIR"
 
+#copy outputs back to home
 if [ -d "$SCRATCH_CHATBOT_DIR/test_results" ]; then
     rsync -av "$SCRATCH_CHATBOT_DIR/test_results/" "$HOME_CHATBOT_DIR/test_results/"
 else
