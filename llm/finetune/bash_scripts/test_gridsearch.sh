@@ -20,6 +20,8 @@ HOME_DATA_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot/data"
 HOME_DATA_FILE="$HOME_DATA_DIR/temp_data/english_test_set.txt"
 SCRATCH_DATA_DIR="$SCRATCH_CHATBOT_DIR/data"
 
+OUTPUT_DIR="$SCRATCH_CHATBOT_DIR/test_results"
+
 #copy project folder across to scratch
 mkdir -p "$SCRATCH_CHATBOT_DIR/llm"
 rsync -a --delete "$HOME_CHATBOT_DIR/llm/" \
@@ -46,7 +48,7 @@ cp "$HOME_DATA_FILE" "$SCRATCH_DATA_DIR"
 echo "Data copied"
 
 #run python file from scratch
-python "$SCRATCH_CHATBOT_DIR/llm/finetune/python_scripts/test_gridsearch.py" || { echo "Python script failed with exit code $?"; exit 1; }
+python "$SCRATCH_CHATBOT_DIR/llm/finetune/python_scripts/test_gridsearch.py" --output_dir $OUTPUT_DIR|| { echo "Python script failed with exit code $?"; exit 1; }
 
 #debugging
 echo "SCRATCH dir: $SCRATCH_CHATBOT_DIR"
