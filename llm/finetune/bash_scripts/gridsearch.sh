@@ -12,7 +12,7 @@
 RUN_ID="20250719_190746"
 
 #set filepaths based on local or cluster run
-if [[ "$(hostname)" == *"mlp"* ]]; then
+if [[ "$PWD" == *"s2751141"* ]]; then
     SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=true
