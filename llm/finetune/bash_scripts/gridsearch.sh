@@ -45,11 +45,13 @@ HOME_GRID_FILE="$HOME_RUN_DIR/grid_params.txt"
 if $ON_CLUSTER; then
     mkdir -p "$SCRATCH_DATA_DIR"
     rsync -a "$HOME_DATA_DIR/" "$SCRATCH_DATA_DIR/" || { echo "ERROR: Failed to copy data folder to scratch"; exit 1; }
+fi
 
 #copy project folder across to scratch
 if $ON_CLUSTER; then
     mkdir -p "$SCRATCH_CHATBOT_DIR/llm"
     rsync -a --delete "$HOME_CHATBOT_DIR/llm/" "$SCRATCH_CHATBOT_DIR/llm" || { echo " ERROR: rsync failed"; exit 1; }
+fi
 
 #activate venv and install requirements
 if $ON_CLUSTER; then
