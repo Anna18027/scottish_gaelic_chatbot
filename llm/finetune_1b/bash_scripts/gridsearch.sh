@@ -70,6 +70,11 @@ if $ON_CLUSTER; then
     rsync -a --delete "$HOME_CHATBOT_DIR/llm/" "$SCRATCH_CHATBOT_DIR/llm" || { echo " ERROR: rsync failed"; exit 1; }
 fi
 
+echo "about to load python 3.10"
+#load pythom 3.10
+module load python/3.10.4
+echo "after loading"
+
 #activate venv and install requirements
 # if $ON_CLUSTER; then
 #     if [ -f "$VENV_PATH/bin/activate" ]; then
