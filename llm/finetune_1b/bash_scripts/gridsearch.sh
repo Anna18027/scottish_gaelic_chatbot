@@ -107,11 +107,13 @@ if $ON_CLUSTER; then
     if [ -f "$VENV_PATH/bin/activate" ]; then
         echo "Activating existing virtual environment..."
         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+        python -m pip install --upgrade pip setuptools || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     else
         echo "WARNING: Virtual environment not found; creating new one..."
         python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+        python -m pip install --upgrade pip setuptools || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     fi
 fi
