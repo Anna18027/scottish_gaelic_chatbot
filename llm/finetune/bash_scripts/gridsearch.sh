@@ -77,14 +77,14 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     echo "==== Running task $TASK_ID of $TOTAL_JOBS ===="
 
     PARAM_STRING=$(sed -n "$((TASK_ID))p" "$SCRATCH_GRID_FILE")
-    LOG_DIR="$RUN_DIR/logs_$TASK_ID"
+    LOG_DIR="$SCRATCH_RUN_DIR/logs_$TASK_ID"
     LOG_FILE="$LOG_DIR/output.log"
 
     mkdir -p "$LOG_DIR" 
 
     START_TIME=$(date +%s)
 
-    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$RUN_DIR" --save_dir "$SAVE_DIR" --log_dir "$LOG_DIR" > "$LOG_FILE" 2>&1
+    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)
