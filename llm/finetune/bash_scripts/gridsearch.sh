@@ -9,7 +9,7 @@
 #SBATCH --mem=64G
 
 #set run id
-RUN_ID="20250719_190746"
+RUN_ID="20250722_111055"
 
 #set filepaths based on local or cluster run
 if [[ "$PWD" == *"s2751141"* ]]; then
