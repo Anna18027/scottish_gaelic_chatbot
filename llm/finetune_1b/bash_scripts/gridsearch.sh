@@ -199,18 +199,18 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     else
         echo "Task $TASK_ID/$TOTAL_JOBS completed successfully in $DURATION seconds"
     fi
+
+    #copy outputs back to home
+    if $ON_CLUSTER; then
+        if [ -d "$SCRATCH_RUN_DIR" ]; then
+            rsync -av "$SCRATCH_RUN_DIR/" "$HOME_RUN_DIR/"
+        else
+            echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
+            exit 1
+        fi
+fi
 done
 
 echo "progress check 3"
-
-#copy outputs back to home
-if $ON_CLUSTER; then
-    if [ -d "$SCRATCH_RUN_DIR" ]; then
-        rsync -av "$SCRATCH_RUN_DIR/" "$HOME_RUN_DIR/"
-    else
-        echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
-        exit 1
-    fi
-fi
 
 echo "bash script complete"

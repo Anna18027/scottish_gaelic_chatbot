@@ -33,7 +33,7 @@ def load_model_from_folder(tokenizer, device, args):
 
 def load_model(tokenizer, device, args):
     if args.model_name=="meta-llama/Llama-3.2-1B":
-        model = load_model_from_folder()
+        model = load_model_from_folder(tokenizer, device, args)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name)
     #full finetuning as default
