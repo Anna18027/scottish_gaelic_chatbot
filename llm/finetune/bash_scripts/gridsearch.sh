@@ -11,6 +11,9 @@
 #set run id
 RUN_ID="20250722_111055"
 
+#set model name
+MODEL_NAME="timinar/baby-llama-58m"
+
 #set filepaths based on local or cluster run
 if [[ "$PWD" == *"s2751141"* ]]; then
     SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
@@ -88,7 +91,7 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
 
     START_TIME=$(date +%s)
 
-    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" > "$LOG_FILE" 2>&1
+    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)
@@ -100,18 +103,29 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     else
         echo "Task $TASK_ID/$TOTAL_JOBS completed successfully in $DURATION seconds"
     fi
+
+    #copy outputs back to home
+    if $ON_CLUSTER; then
+        if [ -d "$SCRATCH_RUN_DIR" ]; then
+            rsync -av "$SCRATCH_RUN_DIR/" "$HOME_RUN_DIR/"
+        else
+            echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
+            exit 1
+        fi
+fi
+
 done
 
 echo "progress check 3"
 
-#copy outputs back to home
-if $ON_CLUSTER; then
-    if [ -d "$SCRATCH_RUN_DIR" ]; then
-        rsync -av "$SCRATCH_RUN_DIR/" "$HOME_RUN_DIR/"
-    else
-        echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
-        exit 1
-    fi
-fi
+# #copy outputs back to home
+# if $ON_CLUSTER; then
+#     if [ -d "$SCRATCH_RUN_DIR" ]; then
+#         rsync -av "$SCRATCH_RUN_DIR/" "$HOME_RUN_DIR/"
+#     else
+#         echo "ERROR: Results not found in $SCRATCH_RUN_DIR"
+#         exit 1
+#     fi
+# fi
 
 echo "bash script complete"
