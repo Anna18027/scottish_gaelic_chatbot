@@ -7,7 +7,7 @@ plotly==6.1.2
 scikit-learn==1.7.0
 llama-stack==0.2.10.1
 transformers==4.52.4
-torch==2.7.1
+torch==2.1.0
 evaluate==0.4.3
 langdetect==1.0.9 #not using this
 fasttext-langdetect==1.0.5
