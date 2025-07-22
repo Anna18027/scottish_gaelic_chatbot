@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=finetune-grid
+#SBATCH --job-name=b1-finetune-grid
 #SBATCH --output=logs/finetune-%j.out
 #SBATCH --error=logs/finetune-%j.err
 #SBATCH --time=04:00:00
