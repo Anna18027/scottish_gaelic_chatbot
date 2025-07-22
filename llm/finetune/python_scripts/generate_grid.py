@@ -19,7 +19,7 @@ print("Using base_dir:", base_dir)
 
 params = {
     # Data subset
-    "subset_size": [20, 200, 2000, 20000, 200000, 2000000]
+    "subset_size": [20, 200, 2000, 20000, 200000, 2000000],
 
     # Training
     "batch_size": 16,
