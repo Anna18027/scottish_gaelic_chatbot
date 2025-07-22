@@ -110,6 +110,18 @@ which python
 echo "Checking python3 version"
 python3 --version
 
+# Check if python3.10 exists
+if command -v python3.10 &> /dev/null; then
+    PY310_VERSION=$(python3.10 --version 2>&1)
+    if [[ "$PY310_VERSION" == *"3.10.4"* ]]; then
+        echo "Python 3.10.4 is available: $PY310_VERSION"
+    else
+        echo "Python 3.10 found but version is not 3.10.4: $PY310_VERSION"
+    fi
+else
+    echo "Python 3.10 not found on this system."
+fi
+
 if $ON_CLUSTER; then
     if [ -f "$VENV_PATH/bin/activate" ]; then
         echo "Activating existing virtual environment..."
