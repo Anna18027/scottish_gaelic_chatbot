@@ -76,7 +76,7 @@ TOTAL_JOBS=$(wc -l < "$SCRATCH_GRID_FILE")
 for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     echo "==== Running task $TASK_ID of $TOTAL_JOBS ===="
 
-    PARAM_STRING=$(sed -n "$((TASK_ID))p" "$GRID_FILE")
+    PARAM_STRING=$(sed -n "$((TASK_ID))p" "$SCRATCH_GRID_FILE")
     LOG_DIR="$RUN_DIR/logs_$TASK_ID"
     LOG_FILE="$LOG_DIR/output.log"
 
