@@ -6,7 +6,6 @@ cwd = os.getcwd()
 
 if "s2751141" in cwd:
     print("Cluster version (mlp)")
-    # chatbot_dir = "/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
     chatbot_dir = "/home/s2751141/dissertation/scottish_gaelic_chatbot"
 else:
     print("Local version")
@@ -16,18 +15,16 @@ base_dir = os.path.join(chatbot_dir, "llm", "finetune", "results")
 
 print("Using base_dir:", base_dir)
 
-# base_dir = "llm/finetune/results/"
-
 # === 1. Define All Parameters Here ===
 
 params = {
     # Data subset
-    "subset_size": 20,
+    "subset_size": [20, 200, 2000, 20000, 200000, 2000000]
 
     # Training
-    "batch_size": 8,
+    "batch_size": 16,
     "learning_rate": 3e-5,
-    "num_epochs": 20,
+    "num_epochs": 50,
     "max_sequence_length": 256,
     "gradient_accum_steps": 8,
     "save_total_limit": 1,
