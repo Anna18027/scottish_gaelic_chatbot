@@ -9,7 +9,7 @@
 #SBATCH --mem=64G
 
 #set run id
-RUN_ID="20250722_111055"
+RUN_ID="20250722_165137"
 
 #set model name
 MODEL_NAME="timinar/baby-llama-58m"
