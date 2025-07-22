@@ -57,6 +57,11 @@ def process_data(tokenized_train, tokenized_val, tokenizer, model, device, args)
     total_tokens = get_json_tokens(tokenized_train, tokenizer)
     subset_tokens = get_json_tokens(tokenized_train_subset, tokenizer)
     prop_tokens = subset_tokens/total_tokens
+    total_subsets = len(tokenized_train) // args.subset_size if args.subset_size > 0 else 1
+
+    print(f"Proportion of MADLAD tokens used is:{prop_tokens}")
+    print(f"Total possible subsets of size {args.subset_size}: {total_subsets}")
+
 
     #filter out data samples causing errors
     tokenized_train_subset, bad_indices_train = remove_bad_indices(tokenized_train_subset, tokenizer, model, device)
