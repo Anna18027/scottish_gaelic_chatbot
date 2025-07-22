@@ -47,6 +47,10 @@ if $ON_CLUSTER; then
     rsync -a "$HOME_DATA_DIR/" "$SCRATCH_DATA_DIR/" || { echo "ERROR: Failed to copy data folder to scratch"; exit 1; }
 fi
 
+#set data to use
+TRAIN_FILE="$SCRATCH_DATA_DIR/madlad_from_huggingface/gd_clean_0000.jsonl.gz"
+VAL_FILE="$SCRATCH_DATA_DIR/temp_data/gaidhlig_test_set.txt"
+
 #copy project folder across to scratch
 if $ON_CLUSTER; then
     mkdir -p "$SCRATCH_CHATBOT_DIR/llm"
@@ -84,7 +88,7 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
 
     START_TIME=$(date +%s)
 
-    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR" > "$LOG_FILE" 2>&1
+    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)
