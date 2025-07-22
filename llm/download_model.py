@@ -11,8 +11,9 @@ model_name = "meta-llama/Llama-3.2-1B"
 
 # Optional: Set a custom cache directory in your home dir
 user = os.environ["USER"]
-cache_dir = f"/exports/eddie/scratch/{user}/hf_models"
+# cache_dir = f"/exports/eddie/scratch/{user}/hf_models"
 #cache_dir = "/home/$USER/hf_models"
+cache_dir = f"/exports/eddie/scratch/{user}/hf_models"
 
 # Download the tokenizer and model
 print(f"Downloading {model_name} to {cache_dir}...")
