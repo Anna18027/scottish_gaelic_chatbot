@@ -3,8 +3,8 @@
 #SBATCH --output=logs/finetune-%j.out
 #SBATCH --error=logs/finetune-%j.err
 #SBATCH --time=04:00:00
-#SBATCH --partition=PGR-Standard
-#SBATCH --gres=gpu:a40:1
+#SBATCH --partition=Teach-Interactive
+#SBATCH --gres=gpu:titan_x:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 
