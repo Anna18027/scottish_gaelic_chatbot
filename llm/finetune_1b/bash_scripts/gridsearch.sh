@@ -128,22 +128,46 @@ else
     echo "Python 3.10 is installed."
 fi
 
+# if $ON_CLUSTER; then
+#     if [ -f "$VENV_PATH/bin/activate" ]; then
+#         echo "Activating existing virtual environment..."
+#         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+#         pip cache purge
+#         python -m pip install --upgrade pip setuptools wheel || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
+#         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+#     else
+#         echo "WARNING: Virtual environment not found; creating new one..."
+#         pip install python3.10
+#         python3.10 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
+#         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+#         pip cache purge
+#         python -m pip install --upgrade pip setuptools wheel || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
+#         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+#     fi
+# fi
+
 if $ON_CLUSTER; then
     if [ -f "$VENV_PATH/bin/activate" ]; then
-        echo "Activating existing virtual environment..."
-        source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-        pip cache purge
-        python -m pip install --upgrade pip setuptools wheel || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
-        pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+        VENV_PYTHON_VERSION=$("$VENV_PATH/bin/python" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+        if [[ "$VENV_PYTHON_VERSION" == "3.10" ]]; then
+            echo "Activating existing Python 3.10 virtual environment..."
+            source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+        else
+            echo "Existing virtual environment Python version is $VENV_PYTHON_VERSION, but Python 3.10 required."
+            echo "Deleting old venv and creating new one with Python 3.10..."
+            rm -rf "$VENV_PATH"
+            python3.10 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
+            source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+        fi
     else
-        echo "WARNING: Virtual environment not found; creating new one..."
-        pip install python3.10
+        echo "No virtual environment found; creating new one with Python 3.10..."
         python3.10 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-        pip cache purge
-        python -m pip install --upgrade pip setuptools wheel || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
-        pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     fi
+
+    pip cache purge
+    python -m pip install --upgrade pip setuptools wheel || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
+    pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
 fi
 
 echo "progress check 2"
