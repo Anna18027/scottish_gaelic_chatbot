@@ -11,7 +11,7 @@ else:
     print("Local version")
     chatbot_dir = "/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
 
-base_dir = os.path.join(chatbot_dir, "llm", "finetune", "results")
+base_dir = os.path.join(chatbot_dir, "llm", "finetune_1b", "results")
 
 print("Using base_dir:", base_dir)
 
@@ -19,12 +19,12 @@ print("Using base_dir:", base_dir)
 
 params = {
     # Data subset
-    "subset_size": [20, 200, 2000, 20000, 200000, 2000000],
+    "subset_size": 20,
 
     # Training
-    "batch_size": 16,
+    "batch_size": [8,16],
     "learning_rate": 3e-5,
-    "num_epochs": 50,
+    "num_epochs": 2,
     "max_sequence_length": 256,
     "gradient_accum_steps": 8,
     "save_total_limit": 1,
