@@ -23,6 +23,7 @@ def load_tokenizer(device, args):
     return tokenizer
 
 def load_model_from_folder(tokenizer, device, args):
+    print(f"Model download dir from args is: {args.model_download_dir}")
     model = AutoModelForCausalLM.from_pretrained(
         args.model_download_dir,
         torch_dtype=torch.float16,
