@@ -56,6 +56,9 @@ def parse_arguments():
 
 
 def main():
+
+    print("Current working directory:", os.getcwd())
+
     args = parse_arguments()
     kwargs = vars(args)
 

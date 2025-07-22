@@ -172,6 +172,14 @@ fi
 
 echo "progress check 2"
 
+#cd to scratch - best practice for running python script
+if $ON_CLUSTER; then
+    echo "Changing working directory to scratch chatbot directory..."
+    cd "$SCRATCH_CHATBOT_DIR" || { echo "ERROR: Failed to cd to $SCRATCH_CHATBOT_DIR"; exit 1; }
+    echo "Current working directory after cd: $(pwd)"
+fi
+
+
 #get total number of tasks
 TOTAL_JOBS=$(wc -l < "$SCRATCH_GRID_FILE")
 
