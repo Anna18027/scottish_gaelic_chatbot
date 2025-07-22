@@ -70,21 +70,23 @@ def main():
     #load model
     model = load_model(tokenizer, device, args)
 
-    #further data processing (and subsetting)
-    tokenized_train, tokenized_val, prop_tokens, data_collator = process_data(tokenized_train, tokenized_val, tokenizer, model, device, args)
+    print("MODEL LOADED!!!")
 
-    #compute initial loss
-    initial_loss, initial_ppl = compute_loss(model, tokenized_val, tokenizer, device)
+    # #further data processing (and subsetting)
+    # tokenized_train, tokenized_val, prop_tokens, data_collator = process_data(tokenized_train, tokenized_val, tokenizer, model, device, args)
 
-    #train model
-    trainer = train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args)
+    # #compute initial loss
+    # initial_loss, initial_ppl = compute_loss(model, tokenized_val, tokenizer, device)
 
-    #save model results
-    best_epoch_num, best_val_loss = save_losses_and_plot(trainer, args)
-    final_loss, final_ppl = finishing_up(model, tokenizer, trainer, tokenized_val, device, args)
+    # #train model
+    # trainer = train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args)
 
-    #generate from prompts
-    # generate_samples()
+    # #save model results
+    # best_epoch_num, best_val_loss = save_losses_and_plot(trainer, args)
+    # final_loss, final_ppl = finishing_up(model, tokenizer, trainer, tokenized_val, device, args)
+
+    # #generate from prompts
+    # # generate_samples()
 
 
 if __name__ == "__main__":
