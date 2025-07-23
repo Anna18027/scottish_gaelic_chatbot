@@ -8,8 +8,8 @@ from train_model import train_model
 from evaluate_model import save_losses_and_plot, finishing_up
 from generate_from_model import generate_samples
 
-# Check if running on cluster
-cluster_running = is_running_on_cluster()
+# # Check if running on cluster
+# cluster_running = is_running_on_cluster()
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Main script for data loading and model training")

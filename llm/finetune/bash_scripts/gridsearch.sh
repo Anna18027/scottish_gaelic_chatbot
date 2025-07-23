@@ -9,7 +9,10 @@
 #SBATCH --mem=64G
 
 #set run id
-RUN_ID="20250722_165137"
+RUN_ID="20250723_203201"
+# RUN_ID="20250723_185045"
+
+echo "$RUN_ID"
 
 #set model name
 MODEL_NAME="timinar/baby-llama-58m"
@@ -19,6 +22,10 @@ if [[ "$PWD" == *"s2751141"* ]]; then
     SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=true
+elif [[ "$PWD" == *"studios"* ]]; then
+    SCRATCH_CHATBOT_DIR="scottish_gaelic_chatbot"
+    HOME_CHATBOT_DIR="scottish_gaelic_chatbot"
+    ON_CLUSTER=false
 else
     SCRATCH_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
@@ -36,6 +43,9 @@ SCRATCH_FINETUNE_DIR="$SCRATCH_CHATBOT_DIR/llm/finetune"
 SCRATCH_RUN_DIR="$SCRATCH_FINETUNE_DIR/results/run_$RUN_ID"
 SCRATCH_SAVE_DIR="$SCRATCH_FINETUNE_DIR/saved_model" 
 SCRATCH_GRID_FILE="$SCRATCH_RUN_DIR/grid_params.txt"
+
+echo "$SCRATCH_RUN_DIR"
+echo "$SCRATCH_GRID_FILE"
 
 #set output filepaths for home (after copying from scratch)
 HOME_DATA_DIR="$HOME_CHATBOT_DIR/data"
@@ -78,6 +88,8 @@ echo "progress check 2"
 
 #get total number of tasks
 TOTAL_JOBS=$(wc -l < "$SCRATCH_GRID_FILE")
+
+echo "$TOTAL_JOBS"
 
 #run python script for each task
 for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do

@@ -4,9 +4,13 @@ from datetime import datetime
 
 cwd = os.getcwd()
 
+
 if "s2751141" in cwd:
     print("Cluster version (mlp)")
     chatbot_dir = "/home/s2751141/dissertation/scottish_gaelic_chatbot"
+elif "studios" in cwd:
+    print("Lightning version")
+    chatbot_dir = 'scottish_gaelic_chatbot'
 else:
     print("Local version")
     chatbot_dir = "/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"

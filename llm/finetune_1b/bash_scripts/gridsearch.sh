@@ -8,14 +8,19 @@
 #SBATCH --mem=64G
 
 #set run id
-# RUN_ID="20250723_125548"
-RUN_ID="20250722_125318"
+# # RUN_ID="20250723_125548"
+# RUN_ID="20250722_125318"
+RUN_ID="20250723_194654"
 
 #set filepaths based on local or cluster run
 if [[ "$PWD" == *"s2751141"* ]]; then
     SCRATCH_CHATBOT_DIR="/disk/scratch/s2751141/dissertation/scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=true
+elif [[ "$PWD" == *"studios"* ]]; then
+    SCRATCH_CHATBOT_DIR="scottish_gaelic_chatbot"
+    HOME_CHATBOT_DIR="scottish_gaelic_chatbot"
+    ON_CLUSTER=false
 else
     SCRATCH_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
