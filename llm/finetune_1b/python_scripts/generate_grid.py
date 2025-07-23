@@ -11,9 +11,13 @@ if "s2751141" in cwd:
 elif "studios" in cwd:
     print("Lightning version")
     chatbot_dir = 'scottish_gaelic_chatbot'
+elif "media" in cwd:
+    print("Sam version")
+    chatbot_dir = 'scottish_gaelic_chatbot'
 else:
     print("Local version")
     chatbot_dir = "/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
+
 
 base_dir = os.path.join(chatbot_dir, "llm", "finetune_1b", "results")
 

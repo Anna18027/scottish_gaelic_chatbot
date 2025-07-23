@@ -38,9 +38,9 @@ def load_model(tokenizer, device, args):
         model = load_model_from_folder(tokenizer, device, args)
     else:
         model = AutoModelForCausalLM.from_pretrained(args.model_name)
-    #full finetuning as default
+    #start with everything frozen
     for param in model.parameters():
-        param.requires_grad = True
+        param.requires_grad = False
     #lora
     if args.peft_mode == "lora" or args.peft_mode == "lora+head":
         lora_config = LoraConfig(
@@ -63,6 +63,13 @@ def load_model(tokenizer, device, args):
         for name, param in model.named_parameters():
             if "lm_head" in name:
                 param.requires_grad = True
+
+
+    if args.peft_mode == "none":
+        for param in model.parameters():
+            param.requires_grad = False
+
+            
     #resize model due to padding tokens in tokenizer
     model.resize_token_embeddings(len(tokenizer))
     model.to(device)

@@ -12,6 +12,7 @@ from transformers import (
     DataCollatorForLanguageModeling,
 )
 from types import SimpleNamespace
+from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset
 
 

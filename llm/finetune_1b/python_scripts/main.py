@@ -64,7 +64,7 @@ def main():
     kwargs = vars(args)
 
     #set device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # torch.cuda.set_per_process_memory_fraction(1.0)
     # torch.backends.cuda.max_split_size_mb = 64
 
@@ -83,6 +83,10 @@ def main():
 
     #compute initial loss
     initial_loss, initial_ppl = compute_loss(model, tokenized_val, tokenizer, device)
+
+    print(torch.cuda.memory_summary())
+    print(f"Type of tokenized train: {type(tokenized_train)}")
+    # print("SAM LOOK", tokenized_train.nelement() * 4)
 
     #train model
     trainer = train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args)

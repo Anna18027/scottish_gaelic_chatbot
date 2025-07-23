@@ -10,7 +10,8 @@
 #set run id
 # # RUN_ID="20250723_125548"
 # RUN_ID="20250722_125318"
-RUN_ID="20250723_194654"
+# RUN_ID="20250723_194654"
+RUN_ID="20250723_210434"
 
 #set filepaths based on local or cluster run
 if [[ "$PWD" == *"s2751141"* ]]; then
@@ -18,6 +19,10 @@ if [[ "$PWD" == *"s2751141"* ]]; then
     HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=true
 elif [[ "$PWD" == *"studios"* ]]; then
+    SCRATCH_CHATBOT_DIR="scottish_gaelic_chatbot"
+    HOME_CHATBOT_DIR="scottish_gaelic_chatbot"
+    ON_CLUSTER=false
+elif [[ "$PWD" == *"media"* ]]; then
     SCRATCH_CHATBOT_DIR="scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="scottish_gaelic_chatbot"
     ON_CLUSTER=false
@@ -47,10 +52,13 @@ HOME_SAVE_DIR="$HOME_FINETUNE_DIR/saved_model"
 HOME_GRID_FILE="$HOME_RUN_DIR/grid_params.txt"
 
 #set model name and download folder
-MODEL_NAME="meta-llama/Llama-3.2-1B"
-MODEL_DIR_NAME="models--meta-llama--Llama-3.2-1B" #set to "none" for timinar
-HOME_MODEL_DOWNLOAD_DIR="$HOME_CHATBOT_DIR/hf_models/$MODEL_DIR_NAME" 
-SCRATCH_MODEL_DOWNLOAD_DIR="$SCRATCH_CHATBOT_DIR/hf_models/$MODEL_DIR_NAME" 
+# MODEL_NAME="meta-llama/Llama-3.2-1B"
+MODEL_NAME="/media/2tb/anna/models/Llama-3.2-1B"
+MODEL_DIR_NAME="/media/2tb/anna/models/Llama-3.2-1B" #set to "none" for timinar
+# HOME_MODEL_DOWNLOAD_DIR="$HOME_CHATBOT_DIR/hf_models/$MODEL_DIR_NAME" 
+# SCRATCH_MODEL_DOWNLOAD_DIR="$SCRATCH_CHATBOT_DIR/hf_models/$MODEL_DIR_NAME" 
+HOME_MODEL_DOWNLOAD_DIR="$MODEL_DIR_NAME" 
+SCRATCH_MODEL_DOWNLOAD_DIR="$MODEL_DIR_NAME" 
 
 #copy data across to scratch
 if $ON_CLUSTER; then
@@ -201,7 +209,7 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
 
     START_TIME=$(date +%s)
 
-    torchrun --nproc_per_node=2 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
+    torchrun --nproc_per_node=1 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
     # python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 

@@ -149,7 +149,7 @@ def get_elapsed_time(start_time, end_time=None):
 #     avg_loss = sum(losses) / len(losses)
 #     perplexity = math.exp(avg_loss)
 #     return avg_loss, perplexity
-def get_collate_fn(tokenizer, device):
+def get_collate_fn(tokenizer, device, batch):
     def collate_to_device(batch):
         input_ids = [torch.tensor(example["input_ids"], dtype=torch.long) for example in batch]
         input_ids = pad_sequence(input_ids, batch_first=True, padding_value=tokenizer.pad_token_id)
@@ -169,9 +169,13 @@ def get_collate_fn(tokenizer, device):
 def compute_loss(model, dataset, tokenizer, device, batch_size=16):
     model.eval()
     losses = []
+    
+    print("prog1")
 
-    collate_fn = get_collate_fn(tokenizer, device)
+    collate_fn = get_collate_fn(tokenizer, device, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+
+    print("prog2")
 
     with torch.no_grad():
         for batch in dataloader:
@@ -179,7 +183,7 @@ def compute_loss(model, dataset, tokenizer, device, batch_size=16):
             loss = outputs.loss.item()
             if not math.isnan(loss):
                 losses.append(loss)
-
+                
     if len(losses) == 0:
         return float('nan'), float('nan')
 

@@ -9,7 +9,7 @@
 #SBATCH --mem=64G
 
 #set run id
-RUN_ID="20250723_203201"
+RUN_ID="20250723_210434"
 # RUN_ID="20250723_185045"
 
 echo "$RUN_ID"
@@ -23,6 +23,10 @@ if [[ "$PWD" == *"s2751141"* ]]; then
     HOME_CHATBOT_DIR="/home/s2751141/dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=true
 elif [[ "$PWD" == *"studios"* ]]; then
+    SCRATCH_CHATBOT_DIR="scottish_gaelic_chatbot"
+    HOME_CHATBOT_DIR="scottish_gaelic_chatbot"
+    ON_CLUSTER=false
+elif [[ "$PWD" == *"media"* ]]; then
     SCRATCH_CHATBOT_DIR="scottish_gaelic_chatbot"
     HOME_CHATBOT_DIR="scottish_gaelic_chatbot"
     ON_CLUSTER=false
