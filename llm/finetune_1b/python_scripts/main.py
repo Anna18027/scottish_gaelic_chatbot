@@ -64,8 +64,8 @@ def main():
     kwargs = vars(args)
 
     #set device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # device = "cpu"
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = "cpu"
 
     #load and tokenize data
     train_dataset, val_dataset = load_data(args)
