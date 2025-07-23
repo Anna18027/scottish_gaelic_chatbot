@@ -31,7 +31,7 @@ params = {
     "early_stopping_patience": 3,
 
     # PEFT
-    "peft_mode": "none",
+    "peft_mode": "lora",
     "lora_r": 8,
     "lora_alpha": 16,
     "lora_dropout": 0.1,
