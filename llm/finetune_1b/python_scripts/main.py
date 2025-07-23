@@ -65,8 +65,8 @@ def main():
 
     #set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    torch.cuda.set_per_process_memory_fraction(1.0)
-    torch.backends.cuda.max_split_size_mb = 64
+    # torch.cuda.set_per_process_memory_fraction(1.0)
+    # torch.backends.cuda.max_split_size_mb = 64
 
     #load and tokenize data
     train_dataset, val_dataset = load_data(args)
