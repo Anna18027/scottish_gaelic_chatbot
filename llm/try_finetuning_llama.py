@@ -20,7 +20,8 @@ from datetime import datetime
 
 #set model params
 num_epochs = 1 #6 was best
-model_name = "timinar/baby-llama-58m" #"meta-llama/Llama-3.2-1B"
+#model_name = "timinar/baby-llama-58m" #"meta-llama/Llama-3.2-1B"
+model_name = "/media/2tb/anna/models/Llama-3.2-1B"
 use_subset = True
 subset_size = 10 #200 was best so far
 batch_size = 1
