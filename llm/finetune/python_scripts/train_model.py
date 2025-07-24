@@ -32,8 +32,8 @@ def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator,
         report_to=None,
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
-        greater_is_better=False,
-        save_safetensors=False,  # Save as pytorch_model.bin
+        greater_is_better=False#,
+        # save_safetensors=False,  # Save as pytorch_model.bin
     )
 
     trainer = Trainer(

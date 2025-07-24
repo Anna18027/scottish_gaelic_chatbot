@@ -15,34 +15,34 @@ from transformers import (
 from peft import PeftModel, PeftConfig
 
 
-def generate_samples(best_epoch_num, best_val_loss, final_loss, final_ppl,
+def generate_samples(finetuned_model, finetuned_tokenizer, best_epoch_num, best_val_loss, final_loss, final_ppl,
                      bad_indices_train, bad_indices_val, device, args):
     # finetuned_model = AutoModelForCausalLM.from_pretrained(finetuned_path)
     # finetuned_tokenizer = AutoTokenizer.from_pretrained(finetuned_path)
-    finetuned_tokenizer = AutoTokenizer.from_pretrained(args.save_dir)
+    # finetuned_tokenizer = AutoTokenizer.from_pretrained(args.save_dir)
 
-    print(f"Save dir is {args.save_dir}")
+    # print(f"Save dir is {args.save_dir}")
 
-    if finetuned_tokenizer.pad_token is None:
-        finetuned_tokenizer.add_tokens(["<|pad|>"])
-        finetuned_tokenizer.pad_token = "<|pad|>"
-        finetuned_tokenizer.pad_token_id = finetuned_tokenizer.convert_tokens_to_ids("<|pad|>")
+    # if finetuned_tokenizer.pad_token is None:
+    #     finetuned_tokenizer.add_tokens(["<|pad|>"])
+    #     finetuned_tokenizer.pad_token = "<|pad|>"
+    #     finetuned_tokenizer.pad_token_id = finetuned_tokenizer.convert_tokens_to_ids("<|pad|>")
 
-    if args.peft_mode != "none":
-        peft_config = PeftConfig.from_pretrained(args.save_dir)
-        base_config = AutoConfig.from_pretrained(peft_config.base_model_name_or_path)
-        base_config.vocab_size = len(finetuned_tokenizer)
-        base_model = AutoModelForCausalLM.from_config(base_config)
-        base_model.resize_token_embeddings(len(finetuned_tokenizer))
-        finetuned_model = PeftModel.from_pretrained(base_model, args.save_dir)
-    else:
-        # finetuned_model = AutoModelForCausalLM.from_pretrained(args.save_dir)
-        # finetuned_model.resize_token_embeddings(len(finetuned_tokenizer))
-        config = AutoConfig.from_pretrained(args.save_dir)
-        config.vocab_size = len(finetuned_tokenizer)
-        finetuned_model = AutoModelForCausalLM.from_config(config)
-        finetuned_model.resize_token_embeddings(len(finetuned_tokenizer))
-        finetuned_model.load_state_dict(torch.load(os.path.join(args.save_dir, "pytorch_model.bin"), map_location=device))
+    # if args.peft_mode != "none":
+    #     peft_config = PeftConfig.from_pretrained(args.save_dir)
+    #     base_config = AutoConfig.from_pretrained(peft_config.base_model_name_or_path)
+    #     base_config.vocab_size = len(finetuned_tokenizer)
+    #     base_model = AutoModelForCausalLM.from_config(base_config)
+    #     base_model.resize_token_embeddings(len(finetuned_tokenizer))
+    #     finetuned_model = PeftModel.from_pretrained(base_model, args.save_dir)
+    # else:
+    #     # finetuned_model = AutoModelForCausalLM.from_pretrained(args.save_dir)
+    #     # finetuned_model.resize_token_embeddings(len(finetuned_tokenizer))
+    #     config = AutoConfig.from_pretrained(args.save_dir)
+    #     config.vocab_size = len(finetuned_tokenizer)
+    #     finetuned_model = AutoModelForCausalLM.from_config(config)
+    #     finetuned_model.resize_token_embeddings(len(finetuned_tokenizer))
+    #     finetuned_model.load_state_dict(torch.load(os.path.join(args.save_dir, "pytorch_model.bin"), map_location=device))
 
     # Now ready to generate
     finetuned_model.eval()

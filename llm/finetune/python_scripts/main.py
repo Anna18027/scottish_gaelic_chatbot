@@ -77,13 +77,14 @@ def main():
 
     #train model
     trainer = train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args)
+    model=trainer.model
 
     #save model results
     best_epoch_num, best_val_loss = save_losses_and_plot(trainer, args)
     final_loss, final_ppl = finishing_up(model, tokenizer, trainer, tokenized_val, device, args)
 
     #generate from prompts
-    generate_samples(best_epoch_num, best_val_loss, final_loss, final_ppl,
+    generate_samples(model, tokenizer, best_epoch_num, best_val_loss, final_loss, final_ppl,
                      bad_indices_train, bad_indices_val, device, args)
 
 

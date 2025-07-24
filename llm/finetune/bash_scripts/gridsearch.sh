@@ -9,7 +9,7 @@
 #SBATCH --mem=64G
 
 #set run id
-# RUN_ID="20250718_140851"
+#RUN_ID="20250718_140851"
 RUN_ID="20250719_190746"
 
 #set model name
