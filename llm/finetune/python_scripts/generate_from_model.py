@@ -10,37 +10,41 @@ from transformers import (
     Trainer,
     TrainingArguments,
     DataCollatorForLanguageModeling,
+    AutoConfig,
 )
-from types import SimpleNamespace
-from datasets import load_dataset
+from peft import PeftModel, PeftConfig
 
 
-def generate_samples(finetuned_path, device, timestamp, output_dir,
-                     best_epoch_num, best_val_loss, final_loss, final_ppl,
-                     bad_indices_train, bad_indices_val, args):
+def generate_samples(best_epoch_num, best_val_loss, final_loss, final_ppl,
+                     bad_indices_train, bad_indices_val, device, args):
     # finetuned_model = AutoModelForCausalLM.from_pretrained(finetuned_path)
     # finetuned_tokenizer = AutoTokenizer.from_pretrained(finetuned_path)
-    finetuned_tokenizer = AutoTokenizer.from_pretrained(finetuned_path)
+    finetuned_tokenizer = AutoTokenizer.from_pretrained(args.save_dir)
+
+    print(f"Save dir is {args.save_dir}")
 
     if finetuned_tokenizer.pad_token is None:
         finetuned_tokenizer.add_tokens(["<|pad|>"])
         finetuned_tokenizer.pad_token = "<|pad|>"
         finetuned_tokenizer.pad_token_id = finetuned_tokenizer.convert_tokens_to_ids("<|pad|>")
 
-    # 2. Load PEFT config (includes base model name)
-    peft_config = PeftConfig.from_pretrained(finetuned_path)
+    if args.peft_mode != "none":
+        peft_config = PeftConfig.from_pretrained(args.save_dir)
+        base_config = AutoConfig.from_pretrained(peft_config.base_model_name_or_path)
+        base_config.vocab_size = len(finetuned_tokenizer)
+        base_model = AutoModelForCausalLM.from_config(base_config)
+        base_model.resize_token_embeddings(len(finetuned_tokenizer))
+        finetuned_model = PeftModel.from_pretrained(base_model, args.save_dir)
+    else:
+        # finetuned_model = AutoModelForCausalLM.from_pretrained(args.save_dir)
+        # finetuned_model.resize_token_embeddings(len(finetuned_tokenizer))
+        config = AutoConfig.from_pretrained(args.save_dir)
+        config.vocab_size = len(finetuned_tokenizer)
+        finetuned_model = AutoModelForCausalLM.from_config(config)
+        finetuned_model.resize_token_embeddings(len(finetuned_tokenizer))
+        finetuned_model.load_state_dict(torch.load(os.path.join(args.save_dir, "pytorch_model.bin"), map_location=device))
 
-    # 3. Load base model with adjusted vocab size
-    base_config = AutoConfig.from_pretrained(peft_config.base_model_name_or_path)
-    base_config.vocab_size = len(finetuned_tokenizer)
-
-    base_model = AutoModelForCausalLM.from_config(base_config)
-    base_model.resize_token_embeddings(len(finetuned_tokenizer))
-
-    # 4. Load LoRA adapter on top of the base model
-    finetuned_model = PeftModel.from_pretrained(base_model, finetuned_path)
-
-    # ✅ Now ready to generate
+    # Now ready to generate
     finetuned_model.eval()
     finetuned_model.to(device)
 
@@ -103,7 +107,6 @@ def generate_samples(finetuned_path, device, timestamp, output_dir,
         english_completions.append({"prompt": english_prompt, "completion": completion_english})
 
     metadata = {
-        "timestamp": timestamp,
         "model": args.model_name,
         "batch_size": args.batch_size,
         "gradient_accumulation_steps": args.gradient_accum_steps,
@@ -129,7 +132,7 @@ def generate_samples(finetuned_path, device, timestamp, output_dir,
         "english_completions": english_completions,
     }
 
-    metadata_file = os.path.join(output_dir, "metadata.json")
+    metadata_file = os.path.join(args.log_dir, "metadata.json")
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=4, ensure_ascii=False)
 

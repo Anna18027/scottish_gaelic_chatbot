@@ -1,6 +1,6 @@
 import argparse
 import torch
-from utils import load_config, get_run_mode, is_running_on_cluster
+from utils import load_config, get_run_mode, is_running_on_cluster, run_with_chime
 from train_functions import compute_loss
 from load_tokenizer_and_model import load_tokenizer, load_model
 from process_data import load_data, tokenize_data, process_data
@@ -70,7 +70,7 @@ def main():
     model = load_model(tokenizer, device, args)
 
     #further data processing (and subsetting)
-    tokenized_train, tokenized_val, prop_tokens, data_collator = process_data(tokenized_train, tokenized_val, tokenizer, model, device, args)
+    tokenized_train, tokenized_val, prop_tokens, data_collator, bad_indices_train, bad_indices_val = process_data(tokenized_train, tokenized_val, tokenizer, model, device, args)
 
     #compute initial loss
     initial_loss, initial_ppl = compute_loss(model, tokenized_val, tokenizer, device)
@@ -83,8 +83,10 @@ def main():
     final_loss, final_ppl = finishing_up(model, tokenizer, trainer, tokenized_val, device, args)
 
     #generate from prompts
-    # generate_samples()
+    generate_samples(best_epoch_num, best_val_loss, final_loss, final_ppl,
+                     bad_indices_train, bad_indices_val, device, args)
+
 
 
 if __name__ == "__main__":
-    main()
+    run_with_chime(main)

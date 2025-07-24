@@ -1,5 +1,8 @@
 import yaml
 import os
+import chime
+
+chime.theme('zelda')
 
 def load_config(config_path):
     with open(config_path, "r") as f:
@@ -30,3 +33,12 @@ def get_run_mode(config):
     else:
         mode = "interactive"
     return mode
+
+def run_with_chime(main_fn):
+    try:
+        main_fn()
+        chime.success()
+    except Exception as e:
+        print(f"[ERROR] An exception occurred: {e}")
+        chime.error()
+        raise

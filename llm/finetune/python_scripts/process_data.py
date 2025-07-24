@@ -70,5 +70,5 @@ def process_data(tokenized_train, tokenized_val, tokenizer, model, device, args)
     #set up data collator
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
-    return tokenized_train_subset, tokenized_val, prop_tokens, data_collator
+    return tokenized_train_subset, tokenized_val, prop_tokens, data_collator, bad_indices_train, bad_indices_val
 

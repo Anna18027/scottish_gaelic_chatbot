@@ -15,3 +15,4 @@ fasttext-langdetect==1.0.5
 accelerate==1.8.1
 peft
 bitsandbytes==0.42
+chime==0.7.0

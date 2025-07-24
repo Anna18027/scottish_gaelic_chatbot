@@ -66,6 +66,21 @@ def save_losses_and_plot(trainer, args):
     return best_epoch_num, best_val_loss
 
 
+# def finishing_up(model, tokenizer, trainer, tokenized_val, device, args):
+#     model.to(device)
+#     final_loss, final_ppl = compute_loss(model, tokenized_val, tokenizer, device)
+#     print("\n--- After Training ---")
+#     print(f"Cross-Entropy Loss: {final_loss:.4f}")
+#     print(f"Perplexity: {final_ppl:.2f}")
+
+#     trainer.save_model(args.save_dir)
+#     tokenizer.save_pretrained(args.save_dir)
+#     print("Training completed.")
+
+#     return final_loss, final_ppl
+
+import os
+
 def finishing_up(model, tokenizer, trainer, tokenized_val, device, args):
     model.to(device)
     final_loss, final_ppl = compute_loss(model, tokenized_val, tokenizer, device)
@@ -73,8 +88,18 @@ def finishing_up(model, tokenizer, trainer, tokenized_val, device, args):
     print(f"Cross-Entropy Loss: {final_loss:.4f}")
     print(f"Perplexity: {final_ppl:.2f}")
 
-    trainer.save_model(args.save_dir)
-    tokenizer.save_pretrained(args.save_dir)
-    print("Training completed.")
+    try:
+        trainer.save_model(args.save_dir)
+        tokenizer.save_pretrained(args.save_dir)
+        print("Training completed.")
+    except Exception as e:
+        print(f"Error during saving: {e}")
+
+    # Debug: List files in save_dir
+    print(f"Contents of {args.save_dir}:")
+    if os.path.exists(args.save_dir):
+        print(os.listdir(args.save_dir))
+    else:
+        print("Save directory does not exist!")
 
     return final_loss, final_ppl
