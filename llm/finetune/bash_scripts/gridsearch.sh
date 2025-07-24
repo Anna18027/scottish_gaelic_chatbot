@@ -222,6 +222,8 @@ else
     conda activate py312env
 fi
 
+echo "Python version before activating venv:
+echo python3 --version
 
 #activate venv and install requirements
 if $ON_CLUSTER; then
@@ -236,6 +238,10 @@ if $ON_CLUSTER; then
         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     fi
 fi
+
+echo "Python version after activating venv:"
+echo python3 --version
+
 
 echo "progress check 2"
 
