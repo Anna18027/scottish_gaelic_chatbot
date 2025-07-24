@@ -223,7 +223,7 @@ else
 fi
 
 echo "Python version before activating venv:"
-echo python3 --version
+python3 --version
 
 #activate venv and install requirements
 if $ON_CLUSTER; then
@@ -240,7 +240,7 @@ if $ON_CLUSTER; then
 fi
 
 echo "Python version after activating venv:"
-echo python3 --version
+python3 --version
 
 
 echo "progress check 2"
