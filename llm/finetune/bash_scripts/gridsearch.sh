@@ -29,7 +29,6 @@ else
     RUN_ID="20250718_140801"
 fi
 
-
 echo "Using HOME_CHATBOT_DIR: $HOME_CHATBOT_DIR"
 echo "Using SCRATCH_CHATBOT_DIR: $SCRATCH_CHATBOT_DIR"
 
@@ -145,7 +144,6 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
             exit 1
         fi
 fi
-
 done
 
 echo "progress check 3"
