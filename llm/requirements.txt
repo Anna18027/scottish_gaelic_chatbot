@@ -14,3 +14,4 @@ fasttext-langdetect==1.0.5
 #fast-langdetect==0.1.0 #might stop using this
 accelerate==1.8.1
 peft
+bitsandbytes==0.42

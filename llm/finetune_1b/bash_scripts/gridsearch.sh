@@ -2,8 +2,8 @@
 #SBATCH --job-name=b1-finetune-grid
 #SBATCH --output=logs/finetune-%j.out
 #SBATCH --error=logs/finetune-%j.err
-#SBATCH --time=04:00:00
-#SBATCH --gres=gpu:2
+#SBATCH --time=01:00:00
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 
@@ -196,8 +196,8 @@ for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
 
     START_TIME=$(date +%s)
 
-    torchrun --nproc_per_node=2 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
-    # python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
+    # torchrun --nproc_per_node=2 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
+    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" --model_download_dir "$SCRATCH_MODEL_DOWNLOAD_DIR" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)
