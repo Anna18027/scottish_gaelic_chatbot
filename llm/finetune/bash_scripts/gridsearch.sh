@@ -2,7 +2,7 @@
 #SBATCH --job-name=finetune-grid
 #SBATCH --output=logs/finetune-%j.out
 #SBATCH --error=logs/finetune-%j.err
-#SBATCH --time=24:00:00
+#SBATCH --time=02:00:00
 #SBATCH --partition=Teach-Standard-Noble
 #SBATCH --gres=gpu:gtx_1080_ti:1
 #SBATCH --cpus-per-task=4
