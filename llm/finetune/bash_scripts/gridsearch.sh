@@ -92,6 +92,42 @@ fi
 #     echo "Checking python3 version"
 #     python3 --version
 # fi
+# if $ON_CLUSTER; then
+#     echo "Finding python path"
+#     which python
+
+#     echo "Checking python3 version"
+#     python3 --version
+
+#     PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
+#     if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
+#         echo "Python 3.12.0 not found, trying conda..."
+
+#         if ! command -v conda &> /dev/null; then
+#             echo "Conda is not installed or not in PATH."
+#             exit 1
+#         fi
+
+#         source $(conda info --base)/etc/profile.d/conda.sh
+
+#         echo "Searching available Python versions in conda:"
+#         conda search python
+
+#         if conda env list | grep -q "py312env"; then
+#             echo "Conda env py312env exists, activating..."
+#         else
+#             echo "Creating conda env py312env with python 3.12.0..."
+#             conda create -n py312env python=3.12.0 -y
+#         fi
+
+#         conda activate py312env
+#     else
+#         echo "Python 3.12.0 is already installed."
+#     fi
+
+#     echo "Final Python version:"
+#     python3 --version
+# fi
 if $ON_CLUSTER; then
     echo "Finding python path"
     which python
@@ -128,7 +164,6 @@ if $ON_CLUSTER; then
     echo "Final Python version:"
     python3 --version
 fi
-
 
 #activate venv and install requirements
 if $ON_CLUSTER; then
