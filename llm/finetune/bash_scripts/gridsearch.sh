@@ -64,34 +64,68 @@ if $ON_CLUSTER; then
     rsync -a --delete "$HOME_CHATBOT_DIR/llm/" "$SCRATCH_CHATBOT_DIR/llm" || { echo " ERROR: rsync failed"; exit 1; }
 fi
 
+# if $ON_CLUSTER; then
+#     #check python version
+#     echo "Finding python path"
+#     which python
+
+#     echo "Checking python3 version"
+#     python3 --version
+
+#     if ! command -v python3.12 &> /dev/null; then
+#         echo "Python 3.12 not found, trying conda..."
+#         if ! command -v conda &> /dev/null; then
+#             echo "Conda is not installed or not in PATH."
+#             exit 1
+#         fi
+#         source $(conda info --base)/etc/profile.d/conda.sh
+#         if conda env list | grep -q "py312env"; then
+#             echo "Conda env py312env exists, activating..."
+#         else
+#             echo "Creating conda env py312env with python 3.12..."
+#             conda create -n py312env python=3.12 -y
+#         fi
+#         conda activate py312env
+#     else
+#         echo "Python 3.12 is installed."
+#     fi
+#     echo "Checking python3 version"
+#     python3 --version
+# fi
 if $ON_CLUSTER; then
-    #check python version
     echo "Finding python path"
     which python
 
     echo "Checking python3 version"
     python3 --version
 
-    if ! command -v python3.12 &> /dev/null; then
-        echo "Python 3.12 not found, trying conda..."
+    PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
+    if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
+        echo "Python 3.12.0 not found, trying conda..."
+
         if ! command -v conda &> /dev/null; then
             echo "Conda is not installed or not in PATH."
             exit 1
         fi
+
         source $(conda info --base)/etc/profile.d/conda.sh
+
         if conda env list | grep -q "py312env"; then
             echo "Conda env py312env exists, activating..."
         else
-            echo "Creating conda env py312env with python 3.12..."
-            conda create -n py312env python=3.12 -y
+            echo "Creating conda env py312env with python 3.12.0..."
+            conda create -n py312env python=3.12.0 -y
         fi
+
         conda activate py312env
     else
-        echo "Python 3.12 is installed."
+        echo "Python 3.12.0 is already installed."
     fi
-    echo "Checking python3 version"
+
+    echo "Final Python version:"
     python3 --version
 fi
+
 
 #activate venv and install requirements
 if $ON_CLUSTER; then
