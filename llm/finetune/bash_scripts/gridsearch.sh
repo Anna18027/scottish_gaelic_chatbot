@@ -109,6 +109,9 @@ if $ON_CLUSTER; then
         fi
 
         source $(conda info --base)/etc/profile.d/conda.sh
+        
+        echo "Searching available Python versions in conda:"
+        conda search python
 
         if conda env list | grep -q "py312env"; then
             echo "Conda env py312env exists, activating..."
