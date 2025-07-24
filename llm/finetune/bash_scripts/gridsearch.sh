@@ -164,41 +164,62 @@ fi
 #     echo "Final Python version:"
 #     python3 --version
 # fi
-if $ON_CLUSTER; then
-    echo "Finding python path"
-    which python
+# if $ON_CLUSTER; then
+#     echo "Finding python path"
+#     which python
 
-    echo "Checking python3 version"
-    python3 --version
+#     echo "Checking python3 version"
+#     python3 --version
 
-    PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
-    if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
-        echo "Python 3.12.0 not found, trying conda..."
+#     PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
+#     if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
+#         echo "Python 3.12.0 not found, trying conda..."
 
-        if ! command -v conda &> /dev/null; then
-            echo "Conda is not installed or not in PATH."
-            exit 1
-        fi
+#         if ! command -v conda &> /dev/null; then
+#             echo "Conda is not installed or not in PATH."
+#             exit 1
+#         fi
 
-        source $(conda info --base)/etc/profile.d/conda.sh
+#         source $(conda info --base)/etc/profile.d/conda.sh
         
-        echo "Available builds for Python 3.12.0:"
-        conda search python=3.12.0 --info
+#         echo "Available builds for Python 3.12.0:"
+#         conda search python=3.12.0 --info
 
-        if conda env list | grep -q "py312env"; then
-            echo "Conda env py312env exists, activating..."
-        else
-            echo "Creating conda env py312env with python 3.12.0 (build h996f2a0_0)..."
-            conda create -n py312env python=3.12.0=h996f2a0_0 -y
-        fi
+#         if conda env list | grep -q "py312env"; then
+#             echo "Conda env py312env exists, activating..."
+#         else
+#             echo "Creating conda env py312env with python 3.12.0 (build h996f2a0_0)..."
+#             conda create -n py312env python=3.12.0=h996f2a0_0 -y
+#         fi
 
+#         conda activate py312env
+#     else
+#         echo "Python 3.12.0 is already installed."
+#     fi
+
+#     echo "Final Python version:"
+#     python3 --version
+# fi
+if conda env list | grep -q "^py312env\s"; then
+    echo "Conda env py312env exists, checking Python version inside it..."
+    source $(conda info --base)/etc/profile.d/conda.sh
+    conda activate py312env
+    
+    PY_VER=$(python --version 2>&1 | awk '{print $2}')
+    if [[ "$PY_VER" != "3.12.0" ]]; then
+        echo "Python version in py312env is $PY_VER, not 3.12.0. Recreating environment..."
+        conda deactivate
+        conda env remove -n py312env -y
+        conda create -n py312env python=3.12.0 -y
         conda activate py312env
     else
-        echo "Python 3.12.0 is already installed."
+        echo "Python 3.12.0 confirmed in py312env."
     fi
-
-    echo "Final Python version:"
-    python3 --version
+else
+    echo "Conda env py312env does not exist. Creating with Python 3.12.0..."
+    source $(conda info --base)/etc/profile.d/conda.sh
+    conda create -n py312env python=3.12.0 -y
+    conda activate py312env
 fi
 
 
