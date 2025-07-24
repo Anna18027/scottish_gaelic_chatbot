@@ -8,11 +8,6 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
 
-#set run id
-RUN_ID="20250718_140801"
-# RUN_ID="20250718_140851"
-# RUN_ID="20250719_190746"
-
 #set model name
 MODEL_NAME="timinar/baby-llama-58m"
 
@@ -26,6 +21,14 @@ else
     HOME_CHATBOT_DIR="/Users/annamcmanus/Documents/2024-25 Masters Year/Dissertation/scottish_gaelic_chatbot"
     ON_CLUSTER=false
 fi
+
+#set run id
+if $ON_CLUSTER; then
+    RUN_ID="20250719_190746"
+else
+    RUN_ID="20250718_140801"
+fi
+
 
 echo "Using HOME_CHATBOT_DIR: $HOME_CHATBOT_DIR"
 echo "Using SCRATCH_CHATBOT_DIR: $SCRATCH_CHATBOT_DIR"
