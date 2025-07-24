@@ -15,7 +15,7 @@ from transformers import (
 )
 from types import SimpleNamespace
 from datasets import load_dataset
-import bitsandbytes as bnb
+from bitsandbytes import AdamW8bit
 
 def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args):
 
@@ -46,7 +46,8 @@ def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator,
         eval_dataset=tokenized_val,
         tokenizer=tokenizer,
         data_collator=data_collator,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=args.early_stopping_patience)]
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=args.early_stopping_patience)],
+        optimizers=(AdamW8bit(model.parameters(), lr=args.learning_rate))
     )
 
     trainer.train()
