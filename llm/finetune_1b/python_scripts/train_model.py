@@ -19,9 +19,6 @@ from bitsandbytes.optim import AdamW8bit
 
 def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args):
 
-    print("bitsandbytes version:")
-    print(bnb.__version__)
-
     training_args = TrainingArguments(
         output_dir=args.save_dir,
         eval_strategy="epoch",
