@@ -89,6 +89,8 @@ if $ON_CLUSTER; then
     else
         echo "Python 3.12 is installed."
     fi
+    echo "Checking python3 version"
+    python3 --version
 fi
 
 #activate venv and install requirements
