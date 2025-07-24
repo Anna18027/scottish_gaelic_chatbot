@@ -15,7 +15,7 @@ from transformers import (
 )
 from types import SimpleNamespace
 from datasets import load_dataset
-from bitsandbytes import AdamW8bit
+from bitsandbytes.optim import AdamW8bit
 
 def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args):
 
