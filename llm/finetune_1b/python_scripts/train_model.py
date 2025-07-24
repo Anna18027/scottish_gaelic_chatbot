@@ -15,9 +15,13 @@ from transformers import (
 )
 from types import SimpleNamespace
 from datasets import load_dataset
-
+import bitsandbytes as bnb
 
 def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args):
+
+    print("bitsandbytes version:")
+    print(bnb.__version__)
+
     training_args = TrainingArguments(
         output_dir=args.save_dir,
         eval_strategy="epoch",
