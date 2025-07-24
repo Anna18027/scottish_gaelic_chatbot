@@ -222,7 +222,7 @@ else
     conda activate py312env
 fi
 
-echo "Python version before activating venv:
+echo "Python version before activating venv:"
 echo python3 --version
 
 #activate venv and install requirements
