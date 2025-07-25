@@ -87,6 +87,7 @@ def load_model(tokenizer, device, args):
             lora_dropout=args.lora_dropout,
             bias="none",
             task_type=TaskType.CAUSAL_LM,
+            use_bnb_8bit=False,
         )
         model = get_peft_model(model, lora_config)
 
