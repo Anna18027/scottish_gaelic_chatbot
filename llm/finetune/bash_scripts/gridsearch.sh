@@ -64,255 +64,55 @@ if $ON_CLUSTER; then
     rsync -a --delete "$HOME_CHATBOT_DIR/llm/" "$SCRATCH_CHATBOT_DIR/llm" || { echo " ERROR: rsync failed"; exit 1; }
 fi
 
-# if $ON_CLUSTER; then
-#     #check python version
-#     echo "Finding python path"
-#     which python
+echo "Finding python path"
+which python
 
-#     echo "Checking python3 version"
-#     python3 --version
-
-#     if ! command -v python3.12 &> /dev/null; then
-#         echo "Python 3.12 not found, trying conda..."
-#         if ! command -v conda &> /dev/null; then
-#             echo "Conda is not installed or not in PATH."
-#             exit 1
-#         fi
-#         source $(conda info --base)/etc/profile.d/conda.sh
-#         if conda env list | grep -q "py312env"; then
-#             echo "Conda env py312env exists, activating..."
-#         else
-#             echo "Creating conda env py312env with python 3.12..."
-#             conda create -n py312env python=3.12 -y
-#         fi
-#         conda activate py312env
-#     else
-#         echo "Python 3.12 is installed."
-#     fi
-#     echo "Checking python3 version"
-#     python3 --version
-# fi
-# if $ON_CLUSTER; then
-#     echo "Finding python path"
-#     which python
-
-#     echo "Checking python3 version"
-#     python3 --version
-
-#     PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
-#     if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
-#         echo "Python 3.12.0 not found, trying conda..."
-
-#         if ! command -v conda &> /dev/null; then
-#             echo "Conda is not installed or not in PATH."
-#             exit 1
-#         fi
-
-#         source $(conda info --base)/etc/profile.d/conda.sh
-
-#         echo "Searching available Python versions in conda:"
-#         conda search python
-
-#         if conda env list | grep -q "py312env"; then
-#             echo "Conda env py312env exists, activating..."
-#         else
-#             echo "Creating conda env py312env with python 3.12.0..."
-#             conda create -n py312env python=3.12.0 -y
-#         fi
-
-#         conda activate py312env
-#     else
-#         echo "Python 3.12.0 is already installed."
-#     fi
-
-#     echo "Final Python version:"
-#     python3 --version
-# fi
-# if $ON_CLUSTER; then
-#     echo "Finding python path"
-#     which python
-
-#     echo "Checking python3 version"
-#     python3 --version
-
-#     PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
-#     if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
-#         echo "Python 3.12.0 not found, trying conda..."
-
-#         if ! command -v conda &> /dev/null; then
-#             echo "Conda is not installed or not in PATH."
-#             exit 1
-#         fi
-
-#         source $(conda info --base)/etc/profile.d/conda.sh
-        
-#         # echo "Searching available Python versions in conda:"
-#         # conda search python
-
-#         if conda env list | grep -q "py312env"; then
-#             echo "Conda env py312env exists, activating..."
-#         else
-#             echo "Creating conda env py312env with python 3.12.0..."
-#             conda create -n py312env python=3.12.0 -y
-#         fi
-
-#         conda activate py312env
-#     else
-#         echo "Python 3.12.0 is already installed."
-#     fi
-
-#     echo "Final Python version:"
-#     python3 --version
-# fi
-# if $ON_CLUSTER; then
-#     echo "Finding python path"
-#     which python
-
-#     echo "Checking python3 version"
-#     python3 --version
-
-#     PYTHON_VERSION_INSTALLED=$(python3 --version 2>&1 | awk '{print $2}')
-#     if [[ "$PYTHON_VERSION_INSTALLED" != "3.12.0" ]]; then
-#         echo "Python 3.12.0 not found, trying conda..."
-
-#         if ! command -v conda &> /dev/null; then
-#             echo "Conda is not installed or not in PATH."
-#             exit 1
-#         fi
-
-#         source $(conda info --base)/etc/profile.d/conda.sh
-        
-#         echo "Available builds for Python 3.12.0:"
-#         conda search python=3.12.0 --info
-
-#         if conda env list | grep -q "py312env"; then
-#             echo "Conda env py312env exists, activating..."
-#         else
-#             echo "Creating conda env py312env with python 3.12.0 (build h996f2a0_0)..."
-#             conda create -n py312env python=3.12.0=h996f2a0_0 -y
-#         fi
-
-#         conda activate py312env
-#     else
-#         echo "Python 3.12.0 is already installed."
-#     fi
-
-#     echo "Final Python version:"
-#     python3 --version
-# fi
-if conda env list | grep -q "^py312env\s"; then
-    echo "Conda env py312env exists, checking Python version inside it..."
-    source $(conda info --base)/etc/profile.d/conda.sh
-    conda activate py312env
-    
-    PY_VER=$(python --version 2>&1 | awk '{print $2}')
-    if [[ "$PY_VER" != "3.12.0" ]]; then
-        echo "Python version in py312env is $PY_VER, not 3.12.0. Recreating environment..."
-        conda deactivate
-        conda env remove -n py312env -y
-        conda create -n py312env python=3.12.0 -y
-        conda activate py312env
-    else
-        echo "Python 3.12.0 confirmed in py312env."
-    fi
-else
-    echo "Conda env py312env does not exist. Creating with Python 3.12.0..."
-    source $(conda info --base)/etc/profile.d/conda.sh
-    conda create -n py312env python=3.12.0 -y
-    conda activate py312env
-fi
-
-echo "Python version before activating venv:"
+echo "Checking python3 version"
 python3 --version
 
-# #activate venv and install requirements
-# if $ON_CLUSTER; then
-#     if [ -f "$VENV_PATH/bin/activate" ]; then
-#         echo "Activating existing virtual environment..."
-#         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-#         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
-#     else
-#         echo "WARNING: Virtual environment not found; creating new one..."
-#         python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
-#         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-#         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
-#     fi
-# fi
-# Activate venv and install requirements
-# if $ON_CLUSTER; then
-#     if [ -f "$VENV_PATH/bin/activate" ]; then
-#         echo "Virtual environment found. Checking Python version..."
-#         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
+if $ON_CLUSTER; then
+    if ! command -v python3.10 &> /dev/null; then
+        echo "Python 3.10 not found, trying conda..."
+        if ! command -v conda &> /dev/null; then
+            echo "Conda is not installed or not in PATH."
+            exit 1
+        fi
+        source $(conda info --base)/etc/profile.d/conda.sh
+        if conda env list | grep -q "py310env"; then
+            echo "Conda env py310env exists, activating..."
+        else
+            echo "Creating conda env py310env with python 3.10..."
+            conda create -n py310env python=3.10 -y
+        fi
+        conda activate py310env
+    else
+        echo "Python 3.10 is installed."
+    fi
+fi
 
-#         VENV_PYTHON_VERSION=$("$VENV_PATH/bin/python3" --version 2>&1 | awk '{print $2}')
-#         echo "Python version in venv: $VENV_PYTHON_VERSION"
 
-#         if [[ "$VENV_PYTHON_VERSION" == "3.12.0" ]]; then
-#             echo "Python version is 3.12.0 — activating existing virtual environment..."
-#             pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
-#         else
-#             echo "Python version is not 3.12.0 — recreating virtual environment..."
-#             deactivate || true
-#             rm -rf "$VENV_PATH"
-#             python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
-#             source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate new virtual environment"; exit 1; }
-
-#             # Confirm new version
-#             echo "New Python version in venv: $(python3 --version)"
-#             pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
-#         fi
-#     else
-#         echo "Virtual environment not found — creating new one..."
-#         python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
-#         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-
-#         echo "New Python version in venv: $(python3 --version)"
-#         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
-#     fi
-# fi
 if $ON_CLUSTER; then
     if [ -f "$VENV_PATH/bin/activate" ]; then
-        echo "Virtual environment found. Checking Python version..."
-        source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-
-        VENV_PYTHON_VERSION=$("$VENV_PATH/bin/python3" --version 2>&1 | awk '{print $2}')
-        echo "Python version in venv: $VENV_PYTHON_VERSION"
-
-        if [[ "$VENV_PYTHON_VERSION" == "3.12.0" ]]; then
-            echo "Python version is 3.12.0 — activating existing virtual environment..."
-            
-            # Fix for missing distutils
-            python3 -m ensurepip --upgrade
-            python3 -m pip install --upgrade pip setuptools wheel
-            
-            pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+        VENV_PYTHON_VERSION=$("$VENV_PATH/bin/python" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+        if [[ "$VENV_PYTHON_VERSION" == "3.10" ]]; then
+            echo "Activating existing Python 3.10 virtual environment..."
+            source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
         else
-            echo "Python version is not 3.12.0 — recreating virtual environment..."
-            deactivate || true
+            echo "Existing virtual environment Python version is $VENV_PYTHON_VERSION, but Python 3.10 required."
+            echo "Deleting old venv and creating new one with Python 3.10..."
             rm -rf "$VENV_PATH"
-            python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
-            source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate new virtual environment"; exit 1; }
-
-            echo "New Python version in venv: $(python3 --version)"
-
-            # Fix for missing distutils
-            python3 -m ensurepip --upgrade
-            python3 -m pip install --upgrade pip setuptools wheel       
-            
-            pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
+            python3.10 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
+            source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
         fi
     else
-        echo "Virtual environment not found — creating new one..."
-        python3 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
+        echo "No virtual environment found; creating new one with Python 3.10..."
+        python3.10 -m venv "$VENV_PATH" || { echo "ERROR: Failed to create virtual environment"; exit 1; }
         source "$VENV_PATH/bin/activate" || { echo "ERROR: Failed to activate virtual environment"; exit 1; }
-
-        echo "New Python version in venv: $(python3 --version)"
-
-        # Fix for missing distutils
-        python3 -m ensurepip --upgrade
-        python3 -m pip install --upgrade pip setuptools wheel
-        pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     fi
+
+    pip cache purge
+    python -m pip install --upgrade pip setuptools wheel || { echo "ERROR: Failed to upgrade pip/setuptools"; exit 1; }
+    pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
 fi
 
 echo "Python version after activating venv:"
