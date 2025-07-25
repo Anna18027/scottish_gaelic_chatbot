@@ -9,6 +9,10 @@ import torch
 BASE_MODEL_DIR = os.path.join("llm", "trained_models")
 VARYING_PARAMS = ["subset_size"]
 
+def is_base_model_standalone(base_model):
+    # Returns True if the base model exists under llm/base_models (standalone model)
+    return os.path.isdir(os.path.join("llm", "base_models", base_model))
+
 def get_base_models():
     return sorted([
         name for name in os.listdir(BASE_MODEL_DIR)
@@ -47,6 +51,17 @@ def parse_line_to_params(line):
         else:
             i += 1
     return params
+
+def get_all_base_models():
+    base_models_trained = get_base_models()  # from trained_models
+    base_models_base = sorted([
+        name for name in os.listdir("llm/base_models")
+        if os.path.isdir(os.path.join("llm/base_models", name))
+    ])
+    # We add a prefix to distinguish the source (optional)
+    # but to keep it simple, just add both lists together:
+    return base_models_trained + base_models_base
+
 
 def gather_all_params_and_values():
     all_params = set()
@@ -96,7 +111,7 @@ app_ui = ui.page_fluid(
             ui.row(
                 ui.column(
                     4,
-                    ui.input_select("base_model", "Select a base model:", choices=[""] + get_base_models()),
+                    ui.input_select("base_model", "Select a base model:", choices=[""] + get_all_base_models()),
                     ui.input_select("run_type", "Select a run type:", choices=[""]),
                     ui.h3("Varying Params"),
                     *param_selectors_varying,
@@ -120,7 +135,7 @@ app_ui = ui.page_fluid(
             "Generate",
             ui.h3("Model selection"),
             ui.row(
-                ui.column(4, ui.input_select("gen_base_model", "Select a base model:", choices=[""] + get_base_models())),
+                ui.column(4, ui.input_select("gen_base_model", "Select a base model:", choices=[""] + get_all_base_models())),
                 ui.column(4, ui.input_select("gen_run_type", "Select a run type:", choices=[""])),
                 ui.column(4, ui.input_select("gen_subset_size", "Select a subset size:", choices=[""]))
             ),
@@ -131,7 +146,16 @@ app_ui = ui.page_fluid(
             ui.input_text("gen_prompt", "Input your prompt here:", placeholder=""),
             ui.input_action_button("gen_submit_btn", "Generate"),
             ui.output_text("gen_prompt_display"),
-            ui.output_text("gen_completion")
+            ui.output_text("gen_completion"),
+            ui.input_slider(
+                "gen_temperature",
+                "Temperature:",
+                min=0,
+                max=1,
+                step=0.01,
+                value=0.8
+            ),
+
         )
     ),
     style="margin-top: 0; padding-top: 0;"
@@ -146,10 +170,27 @@ def server(input, output, session):
     def update_run_type_choices():
         base_model = input.base_model()
         if base_model:
-            run_types = get_run_types(base_model)
-            ui.update_select("run_type", choices=[""] + run_types)
+            if is_base_model_standalone(base_model):
+                # Disable run_type because standalone model, clear choices
+                ui.update_select("run_type", choices=[""], selected=None)
+                # Disable all varying params selectors like subset_size, etc.
+                for param in VARYING_PARAMS:
+                    ui.update_select(f"param_{param}", choices=[""], selected=None)
+                # Also disable static param selectors because no runs exist
+                for param in ALL_PARAMS:
+                    if param not in VARYING_PARAMS:
+                        ui.update_select(f"param_{param}", choices=[""], selected=None)
+            else:
+                # Enable run_type and update choices
+                run_types = get_run_types(base_model)
+                ui.update_select("run_type", choices=[""] + run_types)
+                # Enable all param selectors (varying and static)
+                for param in ALL_PARAMS:
+                    ui.update_select(f"param_{param}")
         else:
-            ui.update_select("run_type", choices=[""])
+            ui.update_select("run_type", choices=[""], selected=None)
+            for param in ALL_PARAMS:
+                ui.update_select(f"param_{param}", choices=[""], selected=None)
 
     @reactive.Effect
     def update_param_choices():
@@ -168,6 +209,38 @@ def server(input, output, session):
         else:
             for param in ALL_PARAMS:
                 ui.update_select(f"param_{param}", choices=[""], selected=None, label=f"Select {param}:")
+
+    # Similarly for generation tab:
+    @reactive.Effect
+    def update_gen_run_type_choices():
+        base_model = input.gen_base_model()
+        if base_model:
+            if is_base_model_standalone(base_model):
+                ui.update_select("gen_run_type", choices=[""], selected=None)
+                ui.update_select("gen_subset_size", choices=[""], selected=None)
+            else:
+                run_types = get_run_types(base_model)
+                ui.update_select("gen_run_type", choices=[""] + run_types)
+                ui.update_select("gen_subset_size", choices=[""])
+        else:
+            ui.update_select("gen_run_type", choices=[""], selected=None)
+            ui.update_select("gen_subset_size", choices=[""], selected=None)
+
+    @reactive.Effect
+    def update_gen_subset_size_choices():
+        base_model = input.gen_base_model()
+        run_type = input.gen_run_type()
+        if base_model and run_type:
+            if is_base_model_standalone(base_model):
+                # no subset sizes for standalone base models
+                ui.update_select("gen_subset_size", choices=[""], selected=None)
+            else:
+                subset_sizes = []
+                if base_model in PARAM_VALUES and run_type in PARAM_VALUES[base_model]:
+                    subset_sizes = sorted(PARAM_VALUES[base_model][run_type].get("subset_size", []))
+                ui.update_select("gen_subset_size", choices=[""] + subset_sizes)
+        else:
+            ui.update_select("gen_subset_size", choices=[""], selected=None)
 
     @output
     @render.text
@@ -347,12 +420,12 @@ def server(input, output, session):
                     return f"[Match found in grid_params.txt line {idx+1}, but {log_folder} does not exist]"
         return "[No matching line in grid_params.txt found]"
 
-    GENERATION_PARAMS = {
+    GENERATION_PARAMS_BASE = {
         "max_new_tokens": 30,
-        "temperature": 0.8,
         "top_p": 0.95,
         "do_sample": True,
     }
+
 
     DEVICE = "cpu"
 
@@ -380,6 +453,24 @@ def server(input, output, session):
     def gen_completion():
         prompt = gen_prompt_triggered()
         base_model = input.gen_base_model()
+        temperature = input.gen_temperature() or 0.8 
+
+        generation_params = dict(GENERATION_PARAMS_BASE)
+        generation_params["temperature"] = temperature
+
+        # If standalone base model, model path is different
+        if is_base_model_standalone(base_model):
+            model_path = os.path.join("llm", "base_models", base_model)
+            if not os.path.isdir(model_path):
+                return f"[Model folder not found: {model_path}]"
+            try:
+                model, tokenizer = load_model_and_tokenizer(model_path)
+                completion = generate_completion(prompt, model, tokenizer, generation_params)
+                return f"Model Completion:\n{completion}"
+            except Exception as e:
+                return f"[Error loading model or generating: {e}]"
+
+        # Otherwise, use the existing logic requiring run_type and subset_size
         run_type = input.gen_run_type()
         subset_size = input.gen_subset_size()
 
@@ -398,11 +489,10 @@ def server(input, output, session):
                     return f"[Model folder not found: {model_path}]"
                 try:
                     model, tokenizer = load_model_and_tokenizer(model_path)
-                    completion = generate_completion(prompt, model, tokenizer, GENERATION_PARAMS)
+                    completion = generate_completion(prompt, model, tokenizer, generation_params)
                     return f"Model Completion:\n{completion}"
                 except Exception as e:
                     return f"[Error loading model or generating: {e}]"
-
         return "[No matching model found for selected subset size]"
 
 
