@@ -24,7 +24,8 @@ fi
 
 #set run id
 if $ON_CLUSTER; then
-    RUN_ID="20250719_190746"
+    # RUN_ID="20250719_190746"
+    RUN_ID="20250725_data"
 else
     RUN_ID="20250718_140801"
 fi
