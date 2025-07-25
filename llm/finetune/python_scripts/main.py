@@ -1,5 +1,6 @@
 import argparse
 import torch
+from transformers import set_seed
 from utils import load_config, get_run_mode, is_running_on_cluster, run_with_chime
 from train_functions import compute_loss
 from load_tokenizer_and_model import load_tokenizer, load_model
@@ -7,6 +8,10 @@ from process_data import load_data, tokenize_data, process_data
 from train_model import train_model
 from evaluate_model import save_losses_and_plot, finishing_up
 from generate_from_model import generate_samples
+
+#set a seed for reproducibility
+seed = 43
+set_seed(seed)
 
 # Check if running on cluster
 cluster_running = is_running_on_cluster()
@@ -76,7 +81,7 @@ def main():
     initial_loss, initial_ppl = compute_loss(model, tokenized_val, tokenizer, device)
 
     #train model
-    trainer = train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args)
+    trainer = train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, seed, args)
     model=trainer.model
 
     #save model results

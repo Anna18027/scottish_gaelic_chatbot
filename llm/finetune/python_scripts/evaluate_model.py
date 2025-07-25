@@ -92,6 +92,16 @@ def finishing_up(model, tokenizer, trainer, tokenized_val, device, args):
         trainer.save_model(args.save_dir)
         tokenizer.save_pretrained(args.save_dir)
         print("Training completed.")
+        # Remove all checkpoint-* directories in save_dir
+        for fname in os.listdir(args.save_dir):
+            fpath = os.path.join(args.save_dir, fname)
+            if os.path.isdir(fpath) and fname.startswith("checkpoint-"):
+                try:
+                    import shutil
+                    shutil.rmtree(fpath)
+                    print(f"Deleted checkpoint directory: {fpath}")
+                except Exception as e:
+                    print(f"Error deleting {fpath}: {e}")
     except Exception as e:
         print(f"Error during saving: {e}")
 

@@ -17,9 +17,11 @@ from types import SimpleNamespace
 from datasets import load_dataset
 
 
-def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, args):
+def train_model(model, tokenizer, tokenized_train, tokenized_val, data_collator, seed, args):
     training_args = TrainingArguments(
         output_dir=args.save_dir,
+        seed = seed,
+        data_seed = seed,
         eval_strategy="epoch",
         save_strategy="epoch",
         logging_strategy="epoch",
