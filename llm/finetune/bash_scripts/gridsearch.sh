@@ -2,7 +2,7 @@
 #SBATCH --job-name=finetune-grid
 #SBATCH --output=logs/finetune-%j.out
 #SBATCH --error=logs/finetune-%j.err
-#SBATCH --time=10:00:00
+#SBATCH --time=24:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=64G
@@ -24,8 +24,8 @@ fi
 #set run id
 if $ON_CLUSTER; then
     # RUN_ID="20250719_190746"
-    # RUN_ID="20250725_data"
-    RUN_ID="20250725_lora"
+    RUN_ID="20250725_data"
+    # RUN_ID="20250725_lora"
 else
     RUN_ID="20250718_140801"
 fi
