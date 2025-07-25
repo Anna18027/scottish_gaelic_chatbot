@@ -38,14 +38,14 @@ REQUIREMENTS_FILE="$SCRATCH_CHATBOT_DIR/llm/requirements.txt"
 SCRATCH_DATA_DIR="$SCRATCH_CHATBOT_DIR/data"
 SCRATCH_FINETUNE_DIR="$SCRATCH_CHATBOT_DIR/llm/finetune"
 SCRATCH_RUN_DIR="$SCRATCH_FINETUNE_DIR/results/run_$RUN_ID"
-SCRATCH_SAVE_DIR="$SCRATCH_FINETUNE_DIR/saved_model" 
+# SCRATCH_SAVE_DIR="$SCRATCH_FINETUNE_DIR/saved_model" 
 SCRATCH_GRID_FILE="$SCRATCH_RUN_DIR/grid_params.txt"
 
 #set output filepaths for home (after copying from scratch)
 HOME_DATA_DIR="$HOME_CHATBOT_DIR/data"
 HOME_FINETUNE_DIR="$HOME_CHATBOT_DIR/llm/finetune"
 HOME_RUN_DIR="$HOME_FINETUNE_DIR/results/run_$RUN_ID"
-HOME_SAVE_DIR="$HOME_FINETUNE_DIR/saved_model" 
+# HOME_SAVE_DIR="$HOME_FINETUNE_DIR/saved_model"
 HOME_GRID_FILE="$HOME_RUN_DIR/grid_params.txt"
 
 #copy data across to scratch
@@ -128,15 +128,17 @@ TOTAL_JOBS=$(wc -l < "$SCRATCH_GRID_FILE")
 for TASK_ID in $(seq 1 $((TOTAL_JOBS))); do
     echo "==== Running task $TASK_ID of $TOTAL_JOBS ===="
 
+
     PARAM_STRING=$(sed -n "$((TASK_ID))p" "$SCRATCH_GRID_FILE")
     LOG_DIR="$SCRATCH_RUN_DIR/logs_$TASK_ID"
     LOG_FILE="$LOG_DIR/output.log"
+    SAVE_DIR="$LOG_DIR/saved_model"
 
-    mkdir -p "$LOG_DIR" 
+    mkdir -p "$LOG_DIR"
 
     START_TIME=$(date +%s)
 
-    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SCRATCH_SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" > "$LOG_FILE" 2>&1
+    python3 "$SCRATCH_FINETUNE_DIR/python_scripts/main.py" $PARAM_STRING --run_name "$RUN_NAME" --run_dir "$SCRATCH_RUN_DIR" --save_dir "$SAVE_DIR" --log_dir "$LOG_DIR"  --train_file "$TRAIN_FILE" --val_file "$VAL_FILE" --model_name "$MODEL_NAME" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     END_TIME=$(date +%s)
