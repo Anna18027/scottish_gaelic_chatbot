@@ -283,7 +283,7 @@ if $ON_CLUSTER; then
             
             # Fix for missing distutils
             python3 -m ensurepip --upgrade
-            pip install --upgrade pip setuptools
+            python3 -m pip install --upgrade pip setuptools wheel
             
             pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
         else
@@ -297,7 +297,7 @@ if $ON_CLUSTER; then
 
             # Fix for missing distutils
             python3 -m ensurepip --upgrade
-            pip install --upgrade pip setuptools
+            python3 -m pip install --upgrade pip setuptools wheel       
             
             pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
         fi
@@ -310,8 +310,7 @@ if $ON_CLUSTER; then
 
         # Fix for missing distutils
         python3 -m ensurepip --upgrade
-        pip install --upgrade pip setuptools
-
+        python3 -m pip install --upgrade pip setuptools wheel
         pip install -r "$REQUIREMENTS_FILE" || { echo "ERROR: Failed to install requirements"; exit 1; }
     fi
 fi
